@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/task.v1.schema.json",
+  "title": "UnderControl Task File",
+  "description": "Schema for UnderControl task files — YAML frontmatter + markdown body. This is the single source of truth for all clients (frontend, CLI, Electron, future clients).",
+  "type": "object",
+  "properties": {
+    "frontmatter": {
+      "type": "object",
+      "description": "YAML frontmatter between --- delimiters",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Task UUID. Present = existing task (update). Absent = new task (create)."
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Task title. Required for new tasks. Also used to derive the filename via normalizeFilename()."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["todo", "in-progress", "pending", "stale", "done", "archived"],
+          "default": "todo",
+          "description": "Task status. Canonical values use hyphens (e.g. 'in-progress'). Clients should normalize on read: 'in_progress', 'InProgress', 'IN_PROGRESS' all map to 'in-progress'."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "List of tags. Supports YAML list format or inline [tag1, tag2] format."
+        },
+        "deadline": {
+          "type": "string",
+          "description": "Task deadline. Accepts multiple date formats, normalized to ISO 8601 on write. Accepted inputs: 'YYYY-MM-DD', 'YYYY/MM/DD', 'YYYY-MM-DDTHH:MM:SS', 'YYYY-MM-DDTHH:MM:SSZ', 'YYYY-MM-DDTHH:MM:SS+HH:MM'."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp (ISO 8601). Set by server on creation. Clients should not modify."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp (ISO 8601). Updated by server. Used for sync conflict detection."
+        }
+      },
+      "required": ["title"],
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "string",
+      "description": "Markdown content after the frontmatter closing '---'. Becomes the task description."
+    }
+  },
+  "$defs": {
+    "file_format": {
+      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntitle: Task Title\nstatus: todo\ntags:\n  - tag1\n  - tag2\ndeadline: 2025-03-15\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nTask description in markdown...\n"
+    },
+    "filename_convention": {
+      "description": "Task files are named: {normalizeFilename(title)}.md\n\nnormalizeFilename rules:\n- Replace unsafe chars (/\\:*?\"<>|%!#$&'()+,;=@[]^`{}~) with '-'\n- Collapse multiple spaces/dashes into single dash\n- Trim leading/trailing dashes\n- Truncate to 100 chars\n- Empty → 'untitled'\n\nDuplicate handling: append '-2', '-3' suffix only when collision detected."
+    },
+    "status_normalization": {
+      "description": "Clients must normalize status values on read. Mapping:\n- 'in_progress', 'InProgress', 'in progress', 'IN_PROGRESS' → 'in-progress'\n- 'to-do' → 'todo'\n- 'completed', 'complete' → 'done'\n- 'archive' → 'archived'\n\nCanonical values for write: todo, in-progress, pending, stale, done, archived"
+    },
+    "url_conventions": {
+      "description": "In-content URL formats for cross-referencing:\n\nApp protocol (stored in backend):\n- resource://  {resourceId}\n- tasks://     {taskId}\n- note://      {taskId}/{noteId}\n\nLocal file paths (in sync folder):\n- ./resources/{resourceId}.{ext}\n- ./{Task-Title}.md\n- ./{TaskTitle}-{NoteFirstLine}.md\n\nClients convert between formats during sync."
+    },
+    "create_vs_update": {
+      "description": "Declarative semantics (kubectl-style):\n- No 'id' in frontmatter → CREATE new task\n- 'id' present → UPDATE existing task (id can be full UUID or prefix)\n\nThis applies to both CLI 'ud apply' and local sync file scanning."
+    }
+  }
+}

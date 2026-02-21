@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/note.v1.schema.json",
+  "title": "UnderControl Note File",
+  "description": "Schema for UnderControl note files — YAML frontmatter + markdown body. Notes are attached to tasks via task_id. This is the single source of truth for all clients.",
+  "type": "object",
+  "properties": {
+    "frontmatter": {
+      "type": "object",
+      "description": "YAML frontmatter between --- delimiters",
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Note UUID. Present = existing note (update). Absent = new note (create)."
+        },
+        "task_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "UUID of the parent task this note belongs to. Required. Aligns with CLI 'ud task note apply' format."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Creation timestamp (ISO 8601). Set by server on creation. Clients should not modify."
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Last update timestamp (ISO 8601). Updated by server."
+        }
+      },
+      "required": ["task_id"],
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "string",
+      "description": "Markdown content after the frontmatter closing '---'. Becomes the note content."
+    }
+  },
+  "$defs": {
+    "file_format": {
+      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntask_id: {parent-task-uuid}\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nNote content in markdown...\n"
+    },
+    "filename_convention": {
+      "description": "Note files are named: {normalizeFilename(taskTitle)}-{normalizeFilename(noteFirstLine)}.md\n\nnoteFirstLine: first non-empty line of the note body content, processed through normalizeFilename().\n\nThe taskTitle prefix associates the note with its parent task visually in the filesystem.\n\nDuplicate handling: append '-2', '-3' suffix only when collision detected.\n\nSame normalizeFilename rules as task files (see task.v1.schema.json)."
+    },
+    "create_vs_update": {
+      "description": "Declarative semantics (kubectl-style):\n- No 'id' in frontmatter → CREATE new note under the specified task_id\n- 'id' present → UPDATE existing note\n\nThis applies to both CLI 'ud task note apply' and local sync file scanning."
+    }
+  }
+}
