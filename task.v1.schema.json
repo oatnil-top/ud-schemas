@@ -17,7 +17,7 @@
         "title": {
           "type": "string",
           "minLength": 1,
-          "description": "Task title. Required for new tasks. Also used to derive the filename via normalizeFilename()."
+          "description": "Task title. Optional — if omitted, derived from the first non-empty line of the body, or from the filename (without .md extension). Also used to derive the filename via normalizeFilename()."
         },
         "status": {
           "type": "string",
@@ -48,7 +48,7 @@
           "description": "Last update timestamp (ISO 8601). Updated by server. Used for sync conflict detection."
         }
       },
-      "required": ["title"],
+      "required": [],
       "additionalProperties": false
     },
     "body": {
@@ -71,6 +71,9 @@
     },
     "create_vs_update": {
       "description": "Declarative semantics (kubectl-style):\n- No 'id' in frontmatter → CREATE new task\n- 'id' present → UPDATE existing task (id can be full UUID or prefix)\n\nThis applies to both CLI 'ud apply' and local sync file scanning."
+    },
+    "defaults": {
+      "description": "Any .md file is a valid task file, even with no frontmatter or empty frontmatter. Default values when fields are omitted:\n- title: derived from the first non-empty line of the body content, or from the filename (without .md extension), or 'Untitled'\n- status: 'todo'\n- tags: []\n- deadline: null\n- description: the body content (everything after frontmatter)\n\nThis means a plain markdown file like 'Buy-Groceries.md' with just body text will create a task titled 'Buy-Groceries' with status 'todo'."
     }
   }
 }
