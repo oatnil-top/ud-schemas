@@ -14,6 +14,10 @@
           "format": "uuid",
           "description": "Note UUID. Present = existing note (update). Absent = new note (create)."
         },
+        "title": {
+          "type": "string",
+          "description": "Note title. Derived from the first non-empty line of the note body (heading prefix stripped). Used to generate the filename: {TaskTitle}-{NoteTitle}.md."
+        },
         "task_id": {
           "type": "string",
           "format": "uuid",
@@ -40,13 +44,16 @@
   },
   "$defs": {
     "file_format": {
-      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntask_id: {parent-task-uuid}\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nNote content in markdown...\n"
+      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntitle: Note Title\ntask_id: {parent-task-uuid}\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nNote content in markdown...\n"
     },
     "filename_convention": {
-      "description": "Note files are named: {normalizeFilename(taskTitle)}-{normalizeFilename(noteFirstLine)}.md\n\nnoteFirstLine: first non-empty line of the note body content, processed through normalizeFilename().\n\nThe taskTitle prefix associates the note with its parent task visually in the filesystem.\n\nDuplicate handling: append '-2', '-3' suffix only when collision detected.\n\nSame normalizeFilename rules as task files (see task.v1.schema.json)."
+      "description": "Note files are named: {normalizeFilename(taskTitle)}-{normalizeFilename(noteTitle)}.md\n\nnoteTitle: derived from the first non-empty line of the note body content, with heading prefix (e.g. '# ') and ordinal prefixes (e.g. '第一条备注：') stripped, processed through normalizeFilename(). The title is also stored in the frontmatter.\n\nThe taskTitle prefix associates the note with its parent task visually in the filesystem.\n\nDuplicate handling: append '-2', '-3' suffix only when collision detected.\n\nSame normalizeFilename rules as task files (see task.v1.schema.json)."
     },
     "create_vs_update": {
       "description": "Declarative semantics (kubectl-style):\n- No 'id' in frontmatter → CREATE new note under the specified task_id\n- 'id' present → UPDATE existing note\n\nThis applies to both CLI 'ud task note apply' and local sync file scanning."
+    },
+    "defaults": {
+      "description": "The only required field is task_id. All other fields have defaults:\n- title: derived from the first non-empty line of the body (heading prefix stripped), or 'note'\n- body/content: can be empty\n- id: absent = create new note\n\nA minimal note file only needs task_id in frontmatter."
     }
   }
 }
