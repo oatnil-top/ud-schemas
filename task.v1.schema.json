@@ -46,24 +46,6 @@
           "type": "string",
           "format": "date-time",
           "description": "Last update timestamp (ISO 8601). Updated by server. Used for sync conflict detection."
-        },
-        "parent": {
-          "type": "string",
-          "description": "Parent task ID (full UUID or prefix). Maps to derivedFromId. On export: populated from the task's derivedFrom relation. On import/apply: sets derivedFromId on this task."
-        },
-        "subtasks": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of subtask IDs (full UUID or prefix). On export: populated from tasks whose derivedFromId points to this task. On import/apply: sets derivedFromId on each listed child task to point to this task."
-        },
-        "linked": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "List of linked task IDs (full UUID or prefix). Maps to linkedToIds. On export: populated from bidirectional links. On import/apply: adds bidirectional links to the specified tasks."
         }
       },
       "required": [],
@@ -76,7 +58,7 @@
   },
   "$defs": {
     "file_format": {
-      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntitle: Task Title\nstatus: todo\ntags:\n  - tag1\n  - tag2\ndeadline: 2025-03-15\nparent: {parent-uuid}\nsubtasks:\n  - {child-uuid-1}\n  - {child-uuid-2}\nlinked:\n  - {linked-uuid}\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nTask description in markdown...\n"
+      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\nid: {uuid}\ntitle: Task Title\nstatus: todo\ntags:\n  - tag1\n  - tag2\ndeadline: 2025-03-15\ncreated_at: 2025-01-01T00:00:00Z\nupdated_at: 2025-01-01T00:00:00Z\n---\n\nTask description in markdown...\n"
     },
     "filename_convention": {
       "description": "Task files are named: {normalizeFilename(title)}.md\n\nnormalizeFilename rules:\n- Replace unsafe chars (/\\:*?\"<>|%!#$&'()+,;=@[]^`{}~) with '-'\n- Collapse multiple spaces/dashes into single dash\n- Trim leading/trailing dashes\n- Truncate to 100 chars\n- Empty → 'untitled'\n\nDuplicate handling: append '-2', '-3' suffix only when collision detected."
