@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/expense.v1.schema.json",
+  "title": "UnDercontrol Expense Resource",
+  "description": "Schema for expense YAML resource files. Expenses track individual spending transactions, optionally linked to a budget and account.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Expense" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Expense title (e.g., 'Coffee at Starbucks')."
+        },
+        "amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money",
+          "description": "Expense amount."
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional details about the expense."
+        },
+        "budget_id": {
+          "type": "string",
+          "description": "Budget UUID or prefix this expense belongs to."
+        },
+        "account_id": {
+          "type": "string",
+          "description": "Account UUID or prefix the expense was paid from."
+        },
+        "occurred_at": {
+          "type": "string",
+          "description": "When the expense occurred. Accepts YYYY-MM-DD or ISO 8601."
+        }
+      },
+      "required": ["amount"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "example": {
+      "description": "Example expense YAML:\n\napiVersion: ud/v1\nkind: Expense\nmetadata:\n  tags: [food, lunch]\nspec:\n  title: Team lunch\n  amount:\n    amount: 85.50\n    currency: USD\n  budget_id: abc123\n  account_id: def456\n  occurred_at: 2025-03-15"
+    }
+  }
+}

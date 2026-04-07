@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/account.v1.schema.json",
+  "title": "UnDercontrol Account Resource",
+  "description": "Schema for account YAML resource files. Accounts represent financial accounts (checking, savings, credit cards, etc.) with a balance.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Account" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Account name (e.g., 'Checking', 'Chase Visa')."
+        },
+        "balance": {
+          "$ref": "resource.v1.schema.json#/$defs/money",
+          "description": "Current account balance."
+        },
+        "off_budget": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, account is tracked but excluded from budget calculations."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free-form notes about the account."
+        }
+      },
+      "required": ["name", "balance"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "example": {
+      "description": "Example account YAML:\n\napiVersion: ud/v1\nkind: Account\nmetadata:\n  tags: [bank]\nspec:\n  name: Checking\n  balance:\n    amount: 5000.00\n    currency: USD\n  off_budget: false\n  notes: Primary checking account"
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/board.v1.schema.json",
+  "title": "UnDercontrol Board Resource",
+  "description": "Schema for Kanban board YAML resource files. Boards organize tasks into columns with optional query filters and auto-actions.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Board" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Board name."
+        },
+        "board_type": {
+          "type": "string",
+          "enum": ["private", "shared"],
+          "default": "private",
+          "description": "private: shows all accessible tasks. shared: shows only tasks shared with the board's group."
+        },
+        "columns": {
+          "type": "array",
+          "description": "Ordered list of columns. Order in the array determines display order.",
+          "items": {
+            "$ref": "#/$defs/column"
+          }
+        },
+        "default_tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags automatically applied to tasks created in this board."
+        }
+      },
+      "required": ["name"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "column": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Column display name."
+        },
+        "query": {
+          "type": "string",
+          "description": "SQL-like filter query for tasks in this column (e.g., 'status:todo', 'status:in-progress AND tag:urgent')."
+        },
+        "actions": {
+          "type": "array",
+          "description": "Auto-actions triggered when tasks enter or exit the column.",
+          "items": {
+            "$ref": "#/$defs/column_action"
+          }
+        }
+      },
+      "required": ["name"]
+    },
+    "column_action": {
+      "type": "object",
+      "properties": {
+        "trigger": {
+          "type": "string",
+          "enum": ["enter", "exit"],
+          "description": "When to fire: 'enter' when task moves into column, 'exit' when task leaves."
+        },
+        "field": {
+          "type": "string",
+          "description": "Task field to modify (e.g., 'status')."
+        },
+        "value": {
+          "type": "string",
+          "description": "Value to set on the field."
+        }
+      },
+      "required": ["trigger", "field", "value"]
+    },
+    "example": {
+      "description": "Example board YAML:\n\napiVersion: ud/v1\nkind: Board\nspec:\n  name: Sprint Board\n  board_type: private\n  default_tags: [sprint-1]\n  columns:\n    - name: Backlog\n      query: \"status:todo\"\n    - name: In Progress\n      query: \"status:in-progress\"\n      actions:\n        - trigger: enter\n          field: status\n          value: in-progress\n    - name: Review\n      query: \"status:pending\"\n      actions:\n        - trigger: enter\n          field: status\n          value: pending\n    - name: Done\n      query: \"status:done\"\n      actions:\n        - trigger: enter\n          field: status\n          value: done"
+    }
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/budget.v1.schema.json",
+  "title": "UnDercontrol Budget Resource",
+  "description": "Schema for budget YAML resource files. Budgets track planned spending with recurring plans and one-time adjustments.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Budget" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Budget name (e.g., 'Groceries', 'Rent')."
+        },
+        "amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money",
+          "description": "Initial budget amount."
+        },
+        "starts_at": {
+          "type": "string",
+          "description": "Budget start date. Accepts YYYY-MM-DD or ISO 8601."
+        },
+        "plans": {
+          "type": "array",
+          "description": "Recurring budget plans. Each plan defines a periodic amount.",
+          "items": {
+            "$ref": "#/$defs/budget_plan"
+          }
+        },
+        "adjustments": {
+          "type": "array",
+          "description": "One-time adjustments to the budget.",
+          "items": {
+            "$ref": "#/$defs/adjustment"
+          }
+        }
+      },
+      "required": ["name", "amount", "starts_at"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "budget_plan": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money"
+        },
+        "frequency": {
+          "type": "string",
+          "enum": ["daily", "weekly", "biweekly", "monthly", "quarterly", "yearly"],
+          "description": "How often the plan amount is applied."
+        },
+        "effective_from": {
+          "type": "string",
+          "description": "Plan start date (YYYY-MM-DD)."
+        },
+        "effective_to": {
+          "type": "string",
+          "description": "Plan end date (YYYY-MM-DD). Omit for open-ended."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this plan was created or changed."
+        }
+      },
+      "required": ["amount", "frequency", "effective_from"]
+    },
+    "adjustment": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "adjustment_date": {
+          "type": "string",
+          "description": "Date of adjustment (YYYY-MM-DD)."
+        }
+      },
+      "required": ["amount", "adjustment_date"]
+    },
+    "example": {
+      "description": "Example budget YAML:\n\napiVersion: ud/v1\nkind: Budget\nmetadata:\n  tags: [food]\nspec:\n  name: Groceries\n  amount:\n    amount: 500.00\n    currency: USD\n  starts_at: 2025-01-01\n  plans:\n    - amount:\n        amount: 500.00\n        currency: USD\n      frequency: monthly\n      effective_from: 2025-01-01\n      reason: Initial monthly budget"
+    }
+  }
+}

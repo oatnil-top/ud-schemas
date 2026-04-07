@@ -1,0 +1,33 @@
+apiVersion: ud/v1
+kind: Account
+spec:
+  name: Checking
+  balance:
+    amount: 5000.00
+    currency: USD
+---
+apiVersion: ud/v1
+kind: Account
+spec:
+  name: Savings
+  balance:
+    amount: 20000.00
+    currency: USD
+  off_budget: true
+---
+apiVersion: ud/v1
+kind: Budget
+metadata:
+  tags: [rent]
+spec:
+  name: Rent
+  amount:
+    amount: 2000.00
+    currency: USD
+  starts_at: 2025-01-01
+  plans:
+    - amount:
+        amount: 2000.00
+        currency: USD
+      frequency: monthly
+      effective_from: 2025-01-01

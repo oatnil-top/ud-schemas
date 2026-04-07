@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/income.v1.schema.json",
+  "title": "UnDercontrol Income Resource",
+  "description": "Schema for income YAML resource files. Income entries track money received from various sources.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Income" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Income title (e.g., 'March salary')."
+        },
+        "amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money",
+          "description": "Income amount."
+        },
+        "description": {
+          "type": "string",
+          "description": "Additional details."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["salary", "freelance", "investment", "gift", "other"],
+          "description": "Income source category."
+        },
+        "account_id": {
+          "type": "string",
+          "description": "Account UUID or prefix the income was deposited to."
+        },
+        "occurred_at": {
+          "type": "string",
+          "description": "When the income was received. Accepts YYYY-MM-DD or ISO 8601."
+        }
+      },
+      "required": ["title", "amount"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "example": {
+      "description": "Example income YAML:\n\napiVersion: ud/v1\nkind: Income\nmetadata:\n  tags: [salary]\nspec:\n  title: March salary\n  amount:\n    amount: 5000.00\n    currency: USD\n  source: salary\n  account_id: abc123\n  occurred_at: 2025-03-31"
+    }
+  }
+}

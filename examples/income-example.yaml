@@ -1,0 +1,12 @@
+apiVersion: ud/v1
+kind: Income
+metadata:
+  tags: [salary]
+spec:
+  title: March salary
+  amount:
+    amount: 5000.00
+    currency: USD
+  source: salary
+  account_id: abc123
+  occurred_at: 2025-03-31

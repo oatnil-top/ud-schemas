@@ -1,0 +1,27 @@
+apiVersion: ud/v1
+kind: Board
+spec:
+  name: Sprint Board
+  board_type: private
+  default_tags: [sprint-1]
+  columns:
+    - name: Backlog
+      query: "status:todo"
+    - name: In Progress
+      query: "status:in-progress"
+      actions:
+        - trigger: enter
+          field: status
+          value: in-progress
+    - name: Review
+      query: "status:pending"
+      actions:
+        - trigger: enter
+          field: status
+          value: pending
+    - name: Done
+      query: "status:done"
+      actions:
+        - trigger: enter
+          field: status
+          value: done

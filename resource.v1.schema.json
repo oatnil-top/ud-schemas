@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/resource.v1.schema.json",
+  "title": "UnDercontrol YAML Resource Envelope",
+  "description": "Generic envelope for YAML resource files. All non-markdown resources use this k8s-like structure: apiVersion + kind + metadata + spec. This is the single source of truth for the envelope format used by CLI 'ud apply -f' and future sync clients.",
+  "type": "object",
+  "properties": {
+    "apiVersion": {
+      "type": "string",
+      "const": "ud/v1",
+      "description": "API version. Always 'ud/v1' for current resources."
+    },
+    "kind": {
+      "type": "string",
+      "enum": ["Board", "Budget", "Account", "Expense", "Income"],
+      "description": "Resource kind. Determines which spec schema to use. Tasks and Notes use .md format instead."
+    },
+    "metadata": {
+      "$ref": "#/$defs/metadata"
+    },
+    "spec": {
+      "type": "object",
+      "description": "Resource-specific fields. Schema varies by kind — see {kind}.v1.schema.json."
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "metadata": {
+      "type": "object",
+      "description": "Common metadata for all resources.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Resource UUID or prefix. Present = update existing, absent = create new. Prefix is resolved to full UUID by the CLI."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Tags for categorization."
+        }
+      },
+      "additionalProperties": false
+    },
+    "money": {
+      "type": "object",
+      "description": "Money value object. Amount is in smallest currency unit (e.g., cents for USD). CLI accepts decimal notation (e.g., 42.50) and converts to cents internally.",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "description": "Decimal amount in major currency units (e.g., 42.50 for $42.50). CLI converts to cents for the API."
+        },
+        "currency": {
+          "type": "string",
+          "default": "USD",
+          "description": "ISO 4217 currency code. Defaults to user's default currency if omitted."
+        }
+      },
+      "required": ["amount"]
+    },
+    "create_vs_update": {
+      "description": "Declarative semantics (kubectl-style):\n- No 'id' in metadata → CREATE new resource\n- 'id' present → UPDATE existing resource (id can be full UUID or prefix)\n\nApply is idempotent: re-applying the same file with an id produces the same result."
+    },
+    "multi_document": {
+      "description": "YAML files support multi-document format with '---' separators. Each document is an independent resource:\n\n---\napiVersion: ud/v1\nkind: Account\nspec:\n  name: Checking\n---\napiVersion: ud/v1\nkind: Account\nspec:\n  name: Savings\n\nResources are applied in order. Errors on one document do not stop processing of subsequent documents."
+    },
+    "file_format": {
+      "description": "YAML resource files (.yaml or .yml) use the k8s-like envelope:\n\napiVersion: ud/v1\nkind: Board\nmetadata:\n  id: abc123\n  tags: [work]\nspec:\n  name: Sprint Board\n  ...\n\nMarkdown files (.md) continue to use frontmatter format for Tasks and Notes. When reading from stdin (-f -), format is auto-detected: content starting with 'apiVersion:' is parsed as YAML, otherwise as markdown."
+    }
+  }
+}

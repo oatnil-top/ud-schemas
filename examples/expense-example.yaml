@@ -1,0 +1,12 @@
+apiVersion: ud/v1
+kind: Expense
+metadata:
+  tags: [food, lunch]
+spec:
+  title: Team lunch
+  amount:
+    amount: 85.50
+    currency: USD
+  budget_id: abc123
+  account_id: def456
+  occurred_at: 2025-03-15

@@ -1,0 +1,17 @@
+apiVersion: ud/v1
+kind: Budget
+metadata:
+  tags: [food]
+spec:
+  name: Groceries
+  amount:
+    amount: 500.00
+    currency: USD
+  starts_at: 2025-01-01
+  plans:
+    - amount:
+        amount: 500.00
+        currency: USD
+      frequency: monthly
+      effective_from: 2025-01-01
+      reason: Initial monthly budget

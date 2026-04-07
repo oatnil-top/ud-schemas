@@ -1,0 +1,11 @@
+apiVersion: ud/v1
+kind: Account
+metadata:
+  tags: [bank]
+spec:
+  name: Checking
+  balance:
+    amount: 5000.00
+    currency: USD
+  off_budget: false
+  notes: Primary checking account

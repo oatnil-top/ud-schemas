@@ -33,6 +33,10 @@
           "default": [],
           "description": "List of tags. Supports YAML list format or inline [tag1, tag2] format."
         },
+        "kickoff": {
+          "type": "string",
+          "description": "Task start time. Accepts multiple date formats, normalized to ISO 8601 on write. Accepted inputs: 'YYYY-MM-DD', 'YYYY/MM/DD', 'YYYY-MM-DDTHH:MM:SS', 'YYYY-MM-DDTHH:MM:SSZ', 'YYYY-MM-DDTHH:MM:SS+HH:MM'."
+        },
         "deadline": {
           "type": "string",
           "description": "Task deadline. Accepts multiple date formats, normalized to ISO 8601 on write. Accepted inputs: 'YYYY-MM-DD', 'YYYY/MM/DD', 'YYYY-MM-DDTHH:MM:SS', 'YYYY-MM-DDTHH:MM:SSZ', 'YYYY-MM-DDTHH:MM:SS+HH:MM'."
