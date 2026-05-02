@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/prompt.v1.schema.json",
+  "title": "UnderControl Workspace Prompt",
+  "description": "Schema for workspace prompt entities. Prompts are short instruction templates used in workspace sessions to direct AI agents. They support {{taskId}} variable substitution and are displayed as quick-action buttons in the workspace UI. Prompts are group-scoped and stored in the database.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Prompt UUID. Present = existing prompt (update). Absent = new prompt (create)."
+    },
+    "label": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 200,
+      "description": "Display name shown in the workspace UI. Free-form text (not a slug). Examples: 'Run Tests', '开始实现', 'Refine Requirements'."
+    },
+    "icon": {
+      "type": "string",
+      "maxLength": 50,
+      "default": "Wrench",
+      "description": "Lucide icon name for UI display. Examples: 'Play', 'FileSearch', 'ClipboardCheck', 'Wrench', 'TerminalSquare'."
+    },
+    "template": {
+      "type": "string",
+      "description": "Prompt template text. Supports {{taskId}} placeholder which is replaced with the actual task ID at invocation time. This is the instruction sent to the AI agent when the prompt is selected."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for categorization and filtering."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {},
+      "description": "Extensible key-value store. Reserved for future use."
+    },
+    "is_builtin": {
+      "type": "boolean",
+      "default": false,
+      "description": "true = system built-in prompt (seeded on first run, cannot be modified or deleted). false = user-created prompt."
+    },
+    "group_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Group this prompt belongs to. All prompts are group-scoped."
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User who created this prompt."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp (ISO 8601). Set by server."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601). Updated by server."
+    }
+  },
+  "required": ["label", "template"],
+  "$defs": {
+    "prompt_vs_skill": {
+      "description": "Prompts and Skills are distinct concepts. A Prompt is a short workspace instruction template (e.g., 'Implement task {{taskId}}') shown as quick-action buttons. A Skill is a full capability definition in markdown, consumed via 'ud prompt <name>' on the CLI. Prompts live in the workspace UI; Skills live in the CLI/agent ecosystem."
+    },
+    "template_variables": {
+      "description": "The template field supports variable substitution. Currently supported: {{taskId}} — replaced with the active task's UUID at invocation time. Variables use double-brace syntax."
+    },
+    "built_in_prompts": {
+      "description": "Three built-in prompts are seeded on first run: 'Start Implementation' (icon: Play), 'Refine Requirements' (icon: FileSearch), 'Check Implementation' (icon: ClipboardCheck). These cannot be modified or deleted by users."
+    }
+  }
+}
