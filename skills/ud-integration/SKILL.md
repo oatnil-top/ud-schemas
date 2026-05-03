@@ -3,7 +3,7 @@ name: ud-integration
 description: "Manage UnDercontrol tasks, notes, and boards via the ud CLI. Pick up tasks from kanban, execute work, report progress, and update status. Use when asked to work on tasks, track progress, update kanban boards, or collaborate through UnDercontrol."
 version: 1.0.0
 license: MIT
-compatibility: Requires ud CLI (npm i -g @anthropic/ud-cli or UnDercontrol desktop app) and network access to UD backend.
+compatibility: Requires ud CLI (see ud.oatnil.com for install) and network access to UD backend.
 metadata:
   author: UnDercontrol
   homepage: https://ud.oatnil.top
@@ -15,16 +15,8 @@ Manage tasks, track progress, and collaborate via kanban boards using the `ud` C
 
 ## Prerequisites
 
-Install the `ud` CLI via one of:
-
-```bash
-# Option 1: npm (recommended for agents)
-npm install -g @oatnil/ud
-
-# Option 2: Included with UnDercontrol desktop app (no extra install needed)
-```
-
-Then configure your context:
+- `ud` CLI installed — see [ud.oatnil.com](https://ud.oatnil.com) for installation options
+- Authenticated context configured:
 
 ```bash
 ud config get-contexts          # list available contexts
