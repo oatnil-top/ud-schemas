@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/comment.v1.schema.json",
+  "title": "UnderControl Comment File",
+  "description": "Schema for UnderControl comment files — YAML frontmatter + markdown body. Comments are attached to tasks via task_id and can anchor to specific text in the description or a note. This is the single source of truth for all clients.",
+  "type": "object",
+  "properties": {
+    "frontmatter": {
+      "type": "object",
+      "description": "YAML frontmatter between --- delimiters",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "UUID or prefix of the parent task. Required."
+        },
+        "comment_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Comment UUID. Present = update existing comment. Absent = create new comment."
+        },
+        "parent_id": {
+          "type": "string",
+          "description": "UUID or prefix of the parent comment. Present = this is a reply. Absent = top-level comment. Only two levels supported (top-level + replies)."
+        },
+        "anchor_target": {
+          "type": "string",
+          "enum": ["", "description", "note"],
+          "description": "Where the comment anchors to. Empty or absent = general (no anchor). 'description' = anchored to task description. 'note' = anchored to a specific note."
+        },
+        "anchor_target_id": {
+          "type": "string",
+          "description": "UUID of the note when anchor_target is 'note'. Not needed when anchor_target is 'description'."
+        },
+        "quoted_text": {
+          "type": "string",
+          "description": "The selected/highlighted text that this comment anchors to. Used for display and re-matching after content edits."
+        },
+        "anchor_prefix": {
+          "type": "string",
+          "description": "~50 characters of text before the quoted selection. Used to disambiguate when the same text appears multiple times."
+        },
+        "anchor_suffix": {
+          "type": "string",
+          "description": "~50 characters of text after the quoted selection. Used to disambiguate when the same text appears multiple times."
+        },
+        "resolved": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether the comment thread is resolved. Only meaningful for top-level comments. Resolving hides the highlight and collapses the thread."
+        }
+      },
+      "required": ["task_id"],
+      "additionalProperties": false
+    },
+    "body": {
+      "type": "string",
+      "description": "Markdown content after the frontmatter closing '---'. Becomes the comment content."
+    }
+  },
+  "$defs": {
+    "file_format": {
+      "description": "The complete file is a markdown file with YAML frontmatter:\n\n---\ntask_id: {parent-task-uuid}\nanchor_target: description\nquoted_text: \"the selected text\"\n---\n\nComment content in markdown...\n"
+    },
+    "create_vs_update": {
+      "description": "Declarative semantics (kubectl-style):\n- No 'comment_id' in frontmatter → CREATE new comment\n- 'comment_id' present → UPDATE existing comment content\n\nRouting:\n- 'parent_id' present → create a REPLY to the specified comment\n- 'anchor_target' present → create an ANCHORED comment\n- Neither → create a GENERAL (non-anchored) comment"
+    },
+    "detection": {
+      "description": "When processing a markdown file with 'ud apply -f', the presence of comment-specific fields distinguishes comments from notes:\n- Has task_id + any of (comment_id, parent_id, anchor_target) → Comment\n- Has task_id + note_id → Note\n- Has task_id only → Note (backward compat)\n- No task_id → Task"
+    },
+    "threading": {
+      "description": "Comments support two-level threading:\n- Top-level comments can be replies, anchored, or general\n- Replies (parent_id set) are always children of a top-level comment\n- Replies cannot have their own anchor or be replied to\n- Resolving a top-level comment collapses the entire thread"
+    },
+    "anchoring": {
+      "description": "Anchor matching strategy:\n1. quoted_text is the primary match key\n2. anchor_prefix + anchor_suffix provide disambiguation context\n3. Match is attempted against the raw markdown of the target (description or note content)\n4. If quoted_text is no longer found (content was edited), the anchor is shown as stale (strikethrough in UI)\n5. Anchors do NOT modify the markdown content — they are stored separately in the comment entity"
+    },
+    "examples": {
+      "description": "Create anchored comment:\n---\ntask_id: abc123\nanchor_target: description\nquoted_text: \"Remove old styled-components\"\n---\nShould we keep this as a peer dependency?\n\nReply:\n---\ntask_id: abc123\nparent_id: def456\n---\nGood point, let's keep it optional.\n\nGeneral comment:\n---\ntask_id: abc123\n---\nCan we deploy a Storybook preview?\n\nUpdate:\n---\ntask_id: abc123\ncomment_id: def456\n---\nUpdated: also keep the theme provider."
+    }
+  }
+}
