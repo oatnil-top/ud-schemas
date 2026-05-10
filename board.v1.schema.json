@@ -32,6 +32,11 @@
           "type": "array",
           "items": { "type": "string" },
           "description": "Tags automatically applied to tasks created in this board."
+        },
+        "project_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Optional reference to a Project entity. When set, the project's cwd is used as a fallback if the board has no explicit projectDir in its metadata."
         }
       },
       "required": ["name"]
@@ -48,39 +53,13 @@
         },
         "query": {
           "type": "string",
-          "description": "SQL-like filter query for tasks in this column (e.g., 'status:todo', 'status:in-progress AND tag:urgent')."
-        },
-        "actions": {
-          "type": "array",
-          "description": "Auto-actions triggered when tasks enter or exit the column.",
-          "items": {
-            "$ref": "#/$defs/column_action"
-          }
+          "description": "SQL-like filter query for tasks in this column (e.g., \"status = 'todo'\", \"status = 'in-progress' AND tags CONTAINS 'urgent'\"). Actions are auto-derived from the query at runtime."
         }
       },
       "required": ["name"]
     },
-    "column_action": {
-      "type": "object",
-      "properties": {
-        "trigger": {
-          "type": "string",
-          "enum": ["enter", "exit"],
-          "description": "When to fire: 'enter' when task moves into column, 'exit' when task leaves."
-        },
-        "field": {
-          "type": "string",
-          "description": "Task field to modify (e.g., 'status')."
-        },
-        "value": {
-          "type": "string",
-          "description": "Value to set on the field."
-        }
-      },
-      "required": ["trigger", "field", "value"]
-    },
     "example": {
-      "description": "Example board YAML:\n\napiVersion: ud/v1\nkind: Board\nspec:\n  name: Sprint Board\n  board_type: private\n  default_tags: [sprint-1]\n  columns:\n    - name: Backlog\n      query: \"status:todo\"\n    - name: In Progress\n      query: \"status:in-progress\"\n      actions:\n        - trigger: enter\n          field: status\n          value: in-progress\n    - name: Review\n      query: \"status:pending\"\n      actions:\n        - trigger: enter\n          field: status\n          value: pending\n    - name: Done\n      query: \"status:done\"\n      actions:\n        - trigger: enter\n          field: status\n          value: done"
+      "description": "Example board YAML:\n\napiVersion: ud/v1\nkind: Board\nspec:\n  name: Sprint Board\n  board_type: private\n  default_tags: [sprint-1]\n  columns:\n    - name: Backlog\n      query: \"status = 'todo'\"\n    - name: In Progress\n      query: \"status = 'in-progress'\"\n    - name: Review\n      query: \"status = 'pending'\"\n    - name: Done\n      query: \"status = 'done'\""
     }
   }
 }

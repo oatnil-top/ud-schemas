@@ -12,7 +12,7 @@
     },
     "kind": {
       "type": "string",
-      "enum": ["Board", "Budget", "Account", "Expense", "Income"],
+      "enum": ["Board", "Budget", "Account", "Expense", "Income", "Project"],
       "description": "Resource kind. Determines which spec schema to use. Tasks and Notes use .md format instead."
     },
     "metadata": {

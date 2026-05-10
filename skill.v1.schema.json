@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/skill.v1.schema.json",
+  "title": "UnderControl Skill",
+  "description": "Schema for UnderControl skill entities. Skills are the unit of capability assignment — they define what a user or agent can do. Skills are group-scoped and stored in the database.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Skill UUID. Present = existing skill (update). Absent = new skill (create)."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Slug-only name: lowercase letters, digits, and hyphens. Must start with a letter. Unique within a group. Used as the human-readable identifier (e.g., 'ud-cli', 'release-workflow')."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "One-liner description used for discovery and listing."
+    },
+    "content": {
+      "type": "string",
+      "description": "Prompt content in markdown. This is the skill's payload — the text that gets output when the skill is consumed (e.g., via 'ud prompt <name>')."
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Tags for categorization and filtering."
+    },
+    "metadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "default": {},
+      "description": "Extensible key-value store (JSONB). Reserved for future use: parameters, tool declarations, agent config."
+    },
+    "editable": {
+      "type": "boolean",
+      "default": true,
+      "description": "false = locked built-in skill (seeded on first run), true = user-created skill. Built-in skills cannot be modified or deleted."
+    },
+    "group_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Group this skill belongs to. All skills are group-scoped."
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "User who created this skill."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp (ISO 8601). Set by server."
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp (ISO 8601). Updated by server."
+    }
+  },
+  "required": ["name", "content"],
+  "$defs": {
+    "naming_convention": {
+      "description": "Skill names are slugs: lowercase letters, digits, and hyphens only. Must start with a letter. Examples: 'ud-cli', 'release-workflow', 'code-review'. Names are unique within a group — two different groups can have skills with the same name."
+    },
+    "built_in_skills": {
+      "description": "Built-in skills are seeded into the database on first run with editable=false. They provide default capabilities (e.g., 'ud-cli' skill prompt). Users cannot modify or delete them, but can create their own skills with different names."
+    },
+    "consumption_model": {
+      "description": "Skills are consumed via stdout: 'ud prompt <skill-name>' fetches the skill from the API and outputs its content. This is consumer-agnostic — any tool that reads stdin/stdout can use skills. Example: 'claude-code $(ud prompt my-skill)'"
+    }
+  }
+}

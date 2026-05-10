@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/project.v1.schema.json",
+  "title": "UnDercontrol Project Resource",
+  "description": "Schema for Project YAML resource files. Projects are first-class entities that boards can reference for cwd, git remote, and other workspace configuration.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Project" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Project display name."
+        },
+        "description": {
+          "type": "string",
+          "default": "",
+          "description": "Optional project description."
+        },
+        "cwd": {
+          "type": "string",
+          "default": "",
+          "description": "Working directory path. Used as fallback cwd when a board references this project and has no explicit projectDir in its metadata."
+        },
+        "git_remote_url": {
+          "type": "string",
+          "default": "",
+          "description": "Optional git remote URL for the project repository."
+        }
+      },
+      "required": ["name"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "cwd_resolution": {
+      "description": "CWD resolution chain when launching a workspace session:\n1. Frontend explicit input (user types a path)\n2. Task metadata 'cwd' field\n3. Board metadata 'projectDir' field\n4. Board's linked project.cwd (this entity)\n5. User preference syncPath\n6. Fallback: '~' (home directory)\n\nThe project.cwd serves as the lowest-priority board-level default, allowing boards to override via their own metadata.projectDir."
+    },
+    "example": {
+      "description": "Example project YAML:\n\napiVersion: ud/v1\nkind: Project\nspec:\n  name: UnDercontrol\n  description: Main product repository\n  cwd: /home/user/projects/undercontrol\n  git_remote_url: https://github.com/oatnil-top/undercontrol.git"
+    }
+  }
+}
