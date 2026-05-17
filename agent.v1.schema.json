@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/agent.v1.schema.json",
+  "title": "UnderControl Agent",
+  "description": "Schema for UnderControl AI agent entities. Agents are autonomous workers that run workspace sessions with delegated access. They have prompts (soul), skills, and trigger conditions.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Agent config UUID. Present = existing agent (update). Absent = new agent (create)."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Slug name: lowercase letters, digits, and hyphens. Unique per owner. Used as the @mention handle (e.g., @pr-reviewer)."
+    },
+    "display_name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Human-friendly display name (e.g., 'PR Reviewer')."
+    },
+    "prompt": {
+      "type": "string",
+      "description": "Soul prompt — system instructions that define the agent's personality and behavior. In markdown frontmatter format, the body becomes the prompt."
+    },
+    "skills": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Skill names to inject into the agent's context when it starts a workspace session."
+    },
+    "triggers": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["manual", "on_mention", "on_assign", "on_subscribe"]
+      },
+      "default": ["manual"],
+      "description": "Conditions that trigger the agent to start a workspace session."
+    },
+    "session_close": {
+      "type": "string",
+      "enum": ["keep_pending", "auto_close"],
+      "default": "keep_pending",
+      "description": "Behavior when the agent finishes work. 'keep_pending' = set task to pending for human review. 'auto_close' = close session automatically."
+    },
+    "daemon_mode": {
+      "type": "string",
+      "enum": ["dynamic", "fixed"],
+      "default": "dynamic",
+      "description": "How the agent selects a daemon. 'dynamic' = pick first online daemon. 'fixed' = use default_daemon_id."
+    },
+    "default_daemon_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Daemon ID to use in fixed mode."
+    },
+    "user_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "The agent's user ID (auto-generated on create). Used for @mention and session identity."
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Owner (creator) user ID. Agent inherits owner's access via delegation."
+    },
+    "is_builtin": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for system agents (e.g., @ud). Built-in agents cannot be deleted."
+    }
+  },
+  "required": ["name"]
+}
