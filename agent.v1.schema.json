@@ -68,6 +68,22 @@
       "format": "uuid",
       "description": "Owner (creator) user ID. Agent inherits owner's access via delegation."
     },
+    "default_tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Tags auto-applied when this agent creates tasks."
+    },
+    "default_board_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Board to auto-add new tasks to."
+    },
+    "default_project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Project to associate new tasks with."
+    },
     "is_builtin": {
       "type": "boolean",
       "default": false,

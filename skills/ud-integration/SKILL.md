@@ -160,10 +160,7 @@ ud describe board <id|name>
 ud query board <id|name> "status = 'todo'" --limit 20
 
 # Search tasks (full-text across title, description, notes)
-ud task grep "<keyword>"
-
-# Natural language query
-ud task nl "<question>"
+ud grep task "<keyword>"
 ```
 
 ### Writing Tasks
@@ -220,30 +217,27 @@ EOF
 
 ```bash
 # Full-text search across title, description, and notes (like grep -r)
-ud task grep "<keyword>"
+ud grep task "<keyword>"
 
 # With filters
-ud task grep "<keyword>" --status todo
-ud task grep "<keyword>" --tags work
-ud task grep "<keyword>" --limit 10
-ud task grep "<keyword>" --sort updated_at --order desc
-ud task grep "<keyword>" --tags work,urgent
-ud task grep "<keyword>" --status todo --status in-progress
+ud grep task "<keyword>" --status todo
+ud grep task "<keyword>" --tags work
+ud grep task "<keyword>" --limit 10
+ud grep task "<keyword>" --sort updated_at --order desc
+ud grep task "<keyword>" --tags work,urgent
+ud grep task "<keyword>" --status todo --status in-progress
 
 # Title-only matching (like find -name)
-ud task query "title ILIKE '%<keyword>%'"
-
-# Natural language query (most flexible)
-ud task nl "<question>"
+ud query "title ILIKE '%<keyword>%'"
 
 # SQL-like query for precise filtering
-ud task query "status = 'in-progress' AND tags @> '{work}'"
+ud query "status = 'in-progress' AND tags @> '{work}'"
 ```
 
 **Search workflow:**
-1. Start with `ud task grep "<keyword>"` — searches everything
+1. Start with `ud grep task "<keyword>"` — searches everything
 2. If too many results, narrow with `--status` or `--tags`
-3. For title-only, use `ud task query "title ILIKE '%keyword%'"`
+3. For title-only, use `ud query "title ILIKE '%keyword%'"`
 4. For details on a match, run `ud describe task <id>`
 
 ### Common Queries
@@ -256,11 +250,7 @@ ud get task --status in-progress
 ud get task --status pending
 
 # Urgent or deadline tasks
-ud task nl "tasks with deadlines in the next 3 days"
 ud get task --tags urgent
-
-# Overdue tasks
-ud task nl "overdue tasks"
 
 # Recently completed
 ud get task --status done --limit 10
@@ -293,10 +283,10 @@ ud prompt <skill-name>
 
 ```bash
 # Link tasks as peers
-ud task link <id1> <id2>
+ud link task <id1> <id2>
 
 # Parent-child relationship
-ud task link <parent-id> <child-id> --subtask
+ud link task <parent-id> <child-id> --subtask
 ```
 
 ---
@@ -336,7 +326,7 @@ When asked "what should I work on?" or "give me a standup summary":
 **Standup summary format:**
 1. Done: `ud get task --status done` (recent)
 2. In progress: `ud get task --status in-progress`
-3. Blocked: `ud task grep "blocked"` or pending tasks
+3. Blocked: `ud grep task "blocked"` or pending tasks
 
 ---
 
@@ -345,7 +335,7 @@ When asked "what should I work on?" or "give me a standup summary":
 | Symptom | Cause | Fix |
 |---------|-------|-----|
 | `error: not authenticated` | No valid context | Run `ud config get-contexts` and `ud config use-context <name>` |
-| `error: not found` | Wrong task ID | Use `ud task grep` to search |
+| `error: not found` | Wrong task ID | Use `ud grep task` to search |
 | `error: network` | Server unreachable | Check connectivity, retry once |
 | Apply silently fails | Missing required fields | Always include ALL fields (apply replaces entirely) |
 
