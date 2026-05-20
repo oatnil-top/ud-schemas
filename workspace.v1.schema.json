@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/workspace.v1.schema.json",
+  "title": "UnDercontrol Workspace Session",
+  "description": "Initiates a workspace session via 'ud apply -f'. Uses YAML envelope format (apiVersion/kind/spec). Fields match the backend POST /workspace/init API. Optional fields are resolved via cascading fallback chains when omitted.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Workspace" },
+    "metadata": {
+      "$ref": "resource.v1.schema.json#/$defs/metadata"
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "description": "Task UUID or prefix to bind the workspace session to. Required."
+        },
+        "daemon_id": {
+          "type": "string",
+          "description": "Target daemon UUID. Optional — resolved: agent.default_daemon_id → first online daemon."
+        },
+        "agent": {
+          "type": "string",
+          "description": "Agent name or UUID. Resolved to agent_user_id for delegation. Optional."
+        },
+        "agent_user_id": {
+          "type": "string",
+          "description": "Agent user UUID for delegation. Takes precedence over 'agent' field. Optional."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "Trigger prompt sent to the agent. Optional."
+        },
+        "board_id": {
+          "type": "string",
+          "description": "Board name or UUID for kanban context. Optional — resolved: agent.default_board_id → task's board."
+        },
+        "project_id": {
+          "type": "string",
+          "description": "Project UUID for workspace context. Optional — resolved: board.project_id → agent.default_project_id."
+        },
+        "cwd": {
+          "type": "string",
+          "description": "Working directory override. Optional — resolved: project.cwd → task.metadata.cwd → board.metadata.projectDir → ~."
+        },
+        "command": {
+          "type": "string",
+          "description": "Launch command override. Optional — defaults to 'claude --dangerously-skip-permissions'."
+        }
+      },
+      "required": ["task_id"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"]
+}
