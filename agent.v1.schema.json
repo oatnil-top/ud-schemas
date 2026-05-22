@@ -84,6 +84,15 @@
       "format": "uuid",
       "description": "Project to associate new tasks with."
     },
+    "agent_cli_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Agent CLI ID — the launch command configuration to use for workspace sessions."
+    },
+    "agent_cli_name": {
+      "type": "string",
+      "description": "Agent CLI name (resolved to agent_cli_id). Convenience alias — use 'claude', 'aider', etc."
+    },
     "is_builtin": {
       "type": "boolean",
       "default": false,

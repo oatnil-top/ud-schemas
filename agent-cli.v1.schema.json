@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/agent-cli.v1.schema.json",
+  "title": "UnderControl Agent CLI",
+  "description": "Schema for UnderControl Agent CLI entities. Agent CLIs define the launch commands used by agents in workspace sessions (e.g., claude, aider, codex).",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Agent CLI UUID. Present = existing (update). Absent = new (create)."
+    },
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "minLength": 1,
+      "maxLength": 100,
+      "description": "Slug name: lowercase letters, digits, and hyphens. Unique per owner. Used to reference the CLI config (e.g., 'claude', 'aider')."
+    },
+    "label": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Human-friendly display label (e.g., 'Claude Code', 'Aider')."
+    },
+    "command": {
+      "type": "string",
+      "description": "The shell command to launch the agent process (e.g., 'claude --dangerously-skip-permissions')."
+    },
+    "builtin": {
+      "type": "boolean",
+      "default": false,
+      "description": "True for system agent CLIs. Built-in CLIs cannot be deleted."
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Owner (creator) user ID."
+    },
+    "group_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Group ID for shared access."
+    }
+  },
+  "required": ["name", "command"]
+}

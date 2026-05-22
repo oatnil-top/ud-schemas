@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/daemon.v1.schema.json",
+  "title": "UnderControl Daemon",
+  "description": "Schema for UnderControl daemon entities. Daemons are background processes that connect via SSE and execute workspace sessions by spawning agent processes.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Daemon UUID. Auto-generated on registration."
+    },
+    "owner_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Owner user ID."
+    },
+    "group_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Group ID for shared access."
+    },
+    "group_permission": {
+      "type": "string",
+      "enum": ["r", "rw"],
+      "description": "Group permission level."
+    },
+    "machine_name": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Hostname of the machine running the daemon."
+    },
+    "machine_id": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "Hardware identifier of the machine."
+    },
+    "client_type": {
+      "type": "string",
+      "maxLength": 50,
+      "description": "Client type: 'electron', 'cli', etc."
+    },
+    "alias": {
+      "type": "string",
+      "maxLength": 255,
+      "description": "User-assigned display name for the daemon."
+    },
+    "platform": {
+      "type": "string",
+      "enum": ["darwin", "linux", "win32"],
+      "description": "Operating system platform."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["online", "offline"],
+      "description": "Current daemon status based on heartbeat."
+    },
+    "capabilities": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Capabilities the daemon supports (e.g., 'workspace', 'exec')."
+    },
+    "last_heartbeat": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the last heartbeat."
+    }
+  },
+  "required": ["machine_name"]
+}
