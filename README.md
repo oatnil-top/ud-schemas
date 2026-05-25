@@ -13,6 +13,7 @@ Open JSON Schema definitions for [UnDercontrol](https://undercontrol.dev) resour
 |--------|-------------|
 | [`task.v1.schema.json`](./task.v1.schema.json) | Task — YAML frontmatter (title, status, tags, deadline) + markdown body |
 | [`note.v1.schema.json`](./note.v1.schema.json) | Note — YAML frontmatter (task_id) + markdown body, attached to a parent task |
+| [`comment.v1.schema.json`](./comment.v1.schema.json) | Comment — YAML frontmatter (task_id, anchor) + markdown body, anchored to task description or notes |
 
 ### YAML resources (`.yaml` — k8s-like envelope)
 
@@ -24,6 +25,18 @@ Open JSON Schema definitions for [UnDercontrol](https://undercontrol.dev) resour
 | [`account.v1.schema.json`](./account.v1.schema.json) | Account — financial account with balance |
 | [`expense.v1.schema.json`](./expense.v1.schema.json) | Expense — spending transaction linked to budget/account |
 | [`income.v1.schema.json`](./income.v1.schema.json) | Income — money received from various sources |
+| [`project.v1.schema.json`](./project.v1.schema.json) | Project — workspace configuration with cwd, git remote, and board references |
+| [`workspace.v1.schema.json`](./workspace.v1.schema.json) | Workspace — session initiation with task, daemon, and agent bindings |
+
+### Entity schemas (API/database entities)
+
+| Schema | Description |
+|--------|-------------|
+| [`agent.v1.schema.json`](./agent.v1.schema.json) | Agent — autonomous AI worker with prompts, skills, and trigger conditions |
+| [`agent-cli.v1.schema.json`](./agent-cli.v1.schema.json) | Agent CLI — launch command configuration for agents in workspace sessions |
+| [`daemon.v1.schema.json`](./daemon.v1.schema.json) | Daemon — background process that connects via SSE and spawns agent sessions |
+| [`prompt.v1.schema.json`](./prompt.v1.schema.json) | Prompt — instruction template for directing agents in workspace sessions |
+| [`skill.v1.schema.json`](./skill.v1.schema.json) | Skill — capability unit defining what a user or agent can do |
 
 ## File format overview
 
@@ -136,4 +149,4 @@ Schemas follow a `v{N}` versioning scheme (e.g., `task.v1.schema.json`). Breakin
 
 ---
 
-Part of the [UnderControl](https://undercontrol.dev) project.
+Part of the [UnDercontrol](https://undercontrol.dev) project.
