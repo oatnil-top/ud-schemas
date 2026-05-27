@@ -50,6 +50,11 @@
           "type": "string",
           "format": "date-time",
           "description": "Last update timestamp (ISO 8601). Updated by server. Used for sync conflict detection."
+        },
+        "path": {
+          "type": "string",
+          "default": "",
+          "description": "Virtual folder path for tree organization. Stores the parent folder location as a free-form string (e.g. '/work/sprint-3'). Empty string means root level. Folders are virtual — derived from path segments at runtime, not stored as entities. Path segment restrictions: alphanumeric, hyphens, underscores, spaces allowed; no /\\:*?\"<>| characters within segments; no leading/trailing spaces or dots per segment; max 64 chars per segment."
         }
       },
       "required": [],
@@ -77,7 +82,7 @@
       "description": "Declarative semantics (kubectl-style):\n- No 'id' in frontmatter → CREATE new task\n- 'id' present → UPDATE existing task (id can be full UUID or prefix)\n\nThis applies to both CLI 'ud apply' and local sync file scanning."
     },
     "defaults": {
-      "description": "Any .md file is a valid task file, even with no frontmatter or empty frontmatter. Default values when fields are omitted:\n- title: derived from the first non-empty line of the body content, or from the filename (without .md extension), or 'Untitled'\n- status: 'todo'\n- tags: []\n- deadline: null\n- description: the body content (everything after frontmatter)\n\nThis means a plain markdown file like 'Buy-Groceries.md' with just body text will create a task titled 'Buy-Groceries' with status 'todo'."
+      "description": "Any .md file is a valid task file, even with no frontmatter or empty frontmatter. Default values when fields are omitted:\n- title: derived from the first non-empty line of the body content, or from the filename (without .md extension), or 'Untitled'\n- status: 'todo'\n- tags: []\n- deadline: null\n- path: '' (root level)\n- description: the body content (everything after frontmatter)\n\nThis means a plain markdown file like 'Buy-Groceries.md' with just body text will create a task titled 'Buy-Groceries' with status 'todo'."
     }
   }
 }
