@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/scheduled-job.v1.schema.json",
+  "title": "UnderControl Scheduled Job",
+  "description": "Schema for UnderControl scheduled job entities. Scheduled jobs run on a cron schedule to create tasks, generate AI summaries, trigger agents, or perform system maintenance.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Scheduled job UUID. Present = existing job (update). Absent = new job (create)."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Human-readable name for the scheduled job."
+    },
+    "description": {
+      "type": "string",
+      "description": "Optional description of what this job does."
+    },
+    "job_type": {
+      "type": "string",
+      "enum": ["task_creation", "ai_task_summary", "database_backup", "report_generation", "custom_webhook", "preset_data_cleanup"],
+      "description": "Type of job to execute. Determines which payload fields are relevant."
+    },
+    "cron_expression": {
+      "type": "string",
+      "description": "5-field cron expression (minute hour dom month dow). Examples: '0 9 * * *' (daily 9am), '0 0 * * 1' (weekly Monday)."
+    },
+    "timezone": {
+      "type": "string",
+      "default": "UTC",
+      "description": "IANA timezone for cron evaluation (e.g., 'Asia/Shanghai', 'America/New_York')."
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the job is active and will be executed on schedule."
+    },
+    "max_runtime_seconds": {
+      "type": "integer",
+      "default": 300,
+      "description": "Maximum execution time in seconds before the job is timed out."
+    },
+    "payload": {
+      "type": "object",
+      "description": "Job-type-specific payload. Fields depend on job_type.",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "(task_creation) Task title template. Supports {{date}}, {{week}}, {{month}}, {{year}}, {{dow}}."
+        },
+        "description": {
+          "type": "string",
+          "description": "(task_creation) Task description template. Include @agent mentions to trigger agents."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "(task_creation, ai_task_summary) Tags to apply to created tasks."
+        },
+        "deadline": {
+          "type": "string",
+          "description": "(task_creation, ai_task_summary) Relative deadline: '+1d', '+7d', 'end_of_week', 'end_of_month'."
+        },
+        "query": {
+          "type": "string",
+          "description": "(ai_task_summary) Query to select tasks as context for AI summarization."
+        },
+        "prompt": {
+          "type": "string",
+          "description": "(ai_task_summary) Instruction prompt for AI summarization."
+        },
+        "title_template": {
+          "type": "string",
+          "description": "(ai_task_summary) Title template with {{date}}, {{ai_title}} variables."
+        },
+        "retention_days": {
+          "type": "integer",
+          "description": "(database_backup) Number of days to retain backup files."
+        },
+        "data_path": {
+          "type": "string",
+          "description": "(database_backup) Path to the data directory to back up."
+        }
+      }
+    }
+  },
+  "required": ["name", "job_type", "cron_expression", "timezone"]
+}
