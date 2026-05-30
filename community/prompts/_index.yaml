@@ -1,0 +1,11 @@
+# Community Prompts Index
+# Machine-readable registry of community-contributed prompts.
+
+entries:
+  - name: standup-summary
+    description: "Summarize a task for daily standup updates"
+    author: UnDercontrol
+    tags: [standup, summary, daily]
+    category: project-management
+    path: standup-summary/prompt.yaml
+    added: "2026-05-30"

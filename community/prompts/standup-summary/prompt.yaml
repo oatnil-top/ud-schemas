@@ -1,0 +1,14 @@
+apiVersion: ud/v1
+kind: Prompt
+spec:
+  label: "Summarize for standup"
+  tags: [standup, summary, daily]
+  template: |
+    Summarize task {{taskId}} for a daily standup update.
+
+    Include exactly 3 sections:
+    - **Done**: What was completed since last update
+    - **Doing**: What is currently in progress
+    - **Blockers**: Any blockers or dependencies (or "None")
+
+    Keep each section to 1-2 bullet points. Total output should be under 100 words.

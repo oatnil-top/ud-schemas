@@ -113,6 +113,21 @@ spec:
 
 See the [`examples/`](./examples/) directory for complete example files.
 
+## Community Registry
+
+The [`community/`](./community/) directory is a shared registry of skills, prompts, and agent configurations contributed by the community.
+
+```bash
+# Browse and install community packages
+ud market list
+ud market install skill code-reviewer
+
+# Or install manually
+curl -sL https://raw.githubusercontent.com/oatnil-top/ud-schemas/main/community/skills/code-reviewer/skill.yaml | ud apply -f -
+```
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for how to share your own skills.
+
 ## Usage
 
 ### Validate with `check-jsonschema` (Python)

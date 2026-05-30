@@ -1,0 +1,30 @@
+# Community Skills Index
+# This file is the machine-readable registry of all community-contributed skills.
+# CLI tools read this to enable `ud market list` and `ud market install`.
+#
+# To add a skill, append an entry and submit a PR.
+
+entries:
+  - name: code-reviewer
+    description: "Review code changes for bugs, security issues, and best practices"
+    author: UnDercontrol
+    tags: [development, code-review, quality]
+    category: development
+    path: code-reviewer/skill.yaml
+    added: "2026-05-30"
+
+  - name: test-writer
+    description: "Generate comprehensive test cases from code or requirements"
+    author: UnDercontrol
+    tags: [development, testing, quality]
+    category: development
+    path: test-writer/skill.yaml
+    added: "2026-05-30"
+
+  - name: api-designer
+    description: "Design RESTful APIs following best practices and conventions"
+    author: UnDercontrol
+    tags: [development, api, design, architecture]
+    category: development
+    path: api-designer/skill.yaml
+    added: "2026-05-30"
