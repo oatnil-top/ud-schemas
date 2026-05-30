@@ -157,9 +157,9 @@ The [`community/`](./community/) directory is a shared registry where the commun
 
 | Type | Count | Browse |
 |------|-------|--------|
-| Skills | 3 | [community/skills/](./community/skills/) |
+| Skills | 4 | [community/skills/](./community/skills/) |
 | Prompts | 1 | [community/prompts/](./community/prompts/) |
-| Agents | — | [community/agents/](./community/agents/) |
+| Agents | 1 | [community/agents/](./community/agents/) |
 | Bundles | — | [community/bundles/](./community/bundles/) |
 
 ### Using the CLI

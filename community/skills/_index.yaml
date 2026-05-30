@@ -28,3 +28,11 @@ entries:
     category: development
     path: api-designer/skill.yaml
     added: "2026-05-30"
+
+  - name: texas-holdem
+    description: "德州扑克玩法规则、发牌脚本、牌力评估、AI决策逻辑"
+    author: UnDercontrol
+    tags: [game, poker]
+    category: other
+    path: texas-holdem/skill.yaml
+    added: "2026-05-30"

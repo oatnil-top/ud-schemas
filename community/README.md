@@ -27,6 +27,7 @@ curl -sL https://raw.githubusercontent.com/oatnil-top/ud-schemas/main/community/
 | [code-reviewer](skills/code-reviewer/) | Review code changes for bugs, security issues, and best practices | Development |
 | [test-writer](skills/test-writer/) | Generate comprehensive test cases from code or requirements | Development |
 | [api-designer](skills/api-designer/) | Design RESTful APIs following best practices and conventions | Development |
+| [texas-holdem](skills/texas-holdem/) | 德州扑克玩法规则、发牌脚本、牌力评估、AI决策逻辑 | Game |
 
 ## Prompts
 
@@ -36,7 +37,9 @@ curl -sL https://raw.githubusercontent.com/oatnil-top/ud-schemas/main/community/
 
 ## Agents
 
-*No community agents yet. [Contribute one!](../CONTRIBUTING.md)*
+| Name | Description | Required Skills |
+|------|-------------|-----------------|
+| [poker-dealer](agents/poker-dealer/) | 德州扑克荷官 — AI Texas Hold'em dealer | texas-holdem, ud-cli (builtin) |
 
 ## Bundles
 
