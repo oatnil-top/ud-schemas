@@ -1,0 +1,100 @@
+apiVersion: ud/v1
+kind: Skill
+spec:
+  name: generate-learning-html
+  description: "Generate interactive HTML pages for network learning content — dark theme, node diagrams, state panels, progressive tabs."
+  tags: ["workflow", "html", "learn-network"]
+  content: |
+    # Generate Learning HTML
+
+    Generate single-file interactive HTML pages for technical learning content. These pages accompany task notes as visual aids — not replacements for the written content.
+
+    ## Design Principles
+
+    1. **Don't upload until user confirms** — always write to `/tmp/` first, let user `open` and review.
+    2. **Single file, no dependencies** — all CSS/JS inline, no CDN links, works offline.
+    3. **Dark theme** — bg `#0d1117`, surface `#161b22`, border `#30363d`. Use the GitHub dark palette.
+    4. **Monospace for terminal output** — `'SF Mono', 'Fira Code', monospace` for code/log blocks.
+    5. **Chinese annotations** — labels, comments, and explanations in Chinese.
+
+    ## Layout Patterns
+
+    ### Pattern A: Node Flow + State Panels + Log Sidebar (3-column)
+
+    Used for: packet flow visualization, step-by-step process walkthroughs.
+
+    ```
+    ┌─────────────┬──────────────────┬──────────────┐
+    │  Left        │  Center           │  Right        │
+    │  Node graph  │  State panels     │  Step detail  │
+    │  (flow)      │  (route/ct/ipt)   │  (sidebar)    │
+    │              │  update per step  │              │
+    └─────────────┴──────────────────┴──────────────┘
+    ```
+
+    Key features:
+    - Packet bar at top showing src/dst/sport/dport — fields highlight orange when DNAT/SNAT changes them
+    - Nodes are colored by type (conntrack=yellow, iptables=red, route=cyan, L2=green, app=purple)
+    - State panels show the **most recent state** of each subsystem up to the current step
+    - Click any node or log entry to jump to that step
+    - Play button auto-advances through steps (1.5-2s per step)
+    - Each step has: node highlight (left), state update (center), detail + log output (right)
+
+    ### Pattern B: Progressive Tabs + Topology SVG + Sidebar (2-column)
+
+    Used for: architecture diagrams, concept mapping, scenario walkthroughs.
+
+    ```
+    Tabs: [Scene 1] [Scene 2] [Scene 3] ...  (simple → complex)
+    ┌──────────────────────┬──────────────────┐
+    │  SVG topology         │  Sidebar          │
+    │  (visual diagram)     │  sections:        │
+    │                       │  - what's new     │
+    │                       │  - Linux mapping  │
+    │                       │  - packet flow    │
+    │                       │  - experiments    │
+    └──────────────────────┴──────────────────┘
+    ```
+
+    Key features:
+    - Each tab adds ONE new concept on top of the previous topology
+    - New elements highlighted with orange border (`svg-new-highlight`)
+    - SVG uses inline styles matching the dark theme, not external CSS
+    - Sidebar sections: 🆕 what's new, 🔄 Linux mapping, 📦 packet changes, 🧪 experiments
+    - Arrows: green=allowed, red-dashed=denied
+    - Linux command equivalents shown in `cmd-block` with syntax highlighting
+
+    ## Color Semantics (consistent across all pages)
+
+    | Color | Var | Meaning |
+    |-------|-----|---------|
+    | `#e3b341` | yellow | conntrack, warnings |
+    | `#f85149` | red | iptables/NSG, deny, firewall |
+    | `#58a6ff` | cyan | routing, info, azure |
+    | `#3fb950` | green | L2, allow, success, terminal output |
+    | `#bc8cff` | purple | application layer, peering, private endpoint |
+    | `#f0883e` | orange | NAT, changes, new elements |
+    | `#0078d4` | azure | Azure-specific resources |
+
+    ## Code Block Patterns
+
+    Terminal/log output blocks:
+    ```html
+    <div class="cmd-block">
+      <span class="dim"># comment</span>
+      <span class="hl">command or highlighted line</span>
+      <span class="deny">denied/error line</span>
+      <span class="comment">← inline annotation</span>
+    </div>
+    ```
+
+    ## Checklist Before Delivering
+
+    - [ ] Write to `/tmp/<descriptive-name>.html`
+    - [ ] Tell user to `open /tmp/<name>.html` to preview
+    - [ ] Wait for user confirmation before `ud upload resource`
+    - [ ] Upload to the relevant task: `ud upload resource /tmp/x.html -t todolist -e <task-id>`
+    - [ ] All text visible on dark background (no dark-on-dark)
+    - [ ] Interactive elements work (tab switching, click-to-select, animation)
+    - [ ] Scrollable panels for overflow content
+    - [ ] No horizontal scroll on main layout (responsive within reason)

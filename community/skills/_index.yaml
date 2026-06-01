@@ -36,3 +36,11 @@ entries:
     category: other
     path: texas-holdem/skill.yaml
     added: "2026-05-30"
+
+  - name: generate-learning-html
+    description: "Generate interactive HTML pages for network learning content — dark theme, node diagrams, state panels, progressive tabs."
+    author: UnDercontrol
+    tags: [workflow, html, learn-network]
+    category: development
+    path: generate-learning-html/skill.yaml
+    added: "2026-06-01"
