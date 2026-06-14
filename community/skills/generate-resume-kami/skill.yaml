@@ -1,0 +1,126 @@
+apiVersion: ud/v1
+kind: Skill
+spec:
+  name: generate-resume-kami
+  description: "Generate a professional HTML resume using Kami design constraints, pulling personal data from ud tasks. Outputs A4 print-ready HTML in EN and ZH."
+  tags: ["workflow", "ai-gen", "resume", "design"]
+  content: |
+    # Generate Resume with Kami Design
+
+    Generate a professional, print-ready HTML resume using the [Kami](https://github.com/tw93/Kami) design system constraints by [@tw93](https://github.com/tw93). Pulls personal data from ud tasks and outputs A4-formatted HTML files.
+
+    > **Attribution**: This skill uses design constraints from [Kami](https://github.com/tw93/Kami) (MIT license) — an open-source design system for professional AI-generated documents. Thanks to tw93 for the beautiful design spec.
+
+    ## Usage
+
+    `/generate-resume-kami [language]`
+
+    - `/generate-resume-kami` — generates both EN and ZH versions
+    - `/generate-resume-kami en` — English only
+    - `/generate-resume-kami zh` — Chinese only
+
+    ## Prerequisites
+
+    - Personal information stored in ud tasks (search for resume, staffing profile, myinfo, education, certs tasks)
+    - Output directory: `tmp/`
+
+    ## Workflow
+
+    ### Step 1: Gather Personal Data from ud
+
+    Search ud for the user's personal information across tasks:
+
+    ```bash
+    ud search "resume OR staffing OR myinfo OR education OR certification"
+    ```
+
+    Read the relevant tasks to collect:
+    1. Name, contact info, location
+    2. Work experience (company, role, dates, description, tech stack)
+    3. Education background
+    4. Certifications
+    5. Skills / tech stack
+
+    If a consolidated personal info task exists (e.g., "个人信息汇总"), use that as the primary source.
+
+    ### Step 2: Generate English HTML Resume
+
+    Create `tmp/resume-<name>.html` following Kami design constraints:
+
+    **Design Rules (from [Kami](https://github.com/tw93/Kami)):**
+    - Canvas: `#f5f4ed` (warm parchment, never pure white)
+    - Accent: `#1B365D` (ink blue — the only accent color)
+    - Ink: `#1a1a1a`
+    - Muted: `#6b6b6b`
+    - Border: `#d4d3cc`
+    - Tag background: `#e8e7e0` (solid hex, never rgba)
+    - Font (EN): Charter, fallback to 'Iowan Old Style', 'Palatino Linotype', Georgia, serif
+    - Load via: `@import url('https://fonts.googleapis.com/css2?family=Charter:ital,wght@0,400;0,700&display=swap')`
+    - Font size: 10.5pt body, heading 22pt
+    - Font weight: only 400 and 500 (never fake bold)
+    - Line height: titles 1.1-1.3, body 1.5-1.55
+    - Page: A4 (210mm x 297mm), padding 36pt 40pt
+    - Section titles: uppercase, letter-spacing 0.12em, accent color, bottom border 0.75pt
+    - Shadow: only ring or whisper shadows, no hard drop shadows
+    - Print: include `@page { size: A4; margin: 0; }` and `-webkit-print-color-adjust: exact`
+
+    **HTML Structure:**
+    - Header: name (h1, accent), title, contact info with dot separators
+    - Profile/Summary section
+    - Experience section: each item with company, date range, role (italic accent), description, tech stack
+    - Skills: 2-column grid with label (accent) + value pairs
+    - Certifications: inline tags with tag-bg background
+    - Education: name + date range + detail
+
+    ### Step 3: Generate Chinese HTML Resume
+
+    Create `tmp/resume-<name>-zh.html` with these CJK adjustments:
+
+    **Chinese-specific Design Rules (from [Kami](https://github.com/tw93/Kami)):**
+    - Font: TsangerJinKai02 (仓耳今楷02), loaded from CDN:
+      ```css
+      @font-face {
+        font-family: 'TsangerJinKai02';
+        src: url('https://cdn.jsdelivr.net/gh/tw93/kami@main/fonts/TsangerJinKai02.woff2') format('woff2');
+        font-weight: 400; font-style: normal; font-display: swap;
+      }
+      ```
+    - Fallback: 'Songti SC', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif
+    - Line height: slightly higher at 1.55-1.6 for CJK readability
+    - Letter spacing for section titles: 0.15em (wider than EN)
+    - Name h1: 24pt with letter-spacing 0.08em
+    - Dates: use `2025.08` format (not `Aug 2025`), keep in Charter/Georgia font
+    - Tech stack values: keep in Charter/Georgia (English terms)
+    - Section titles in Chinese: 个人简介, 工作经历, 专业技能, 专业认证, 教育背景
+    - Translate role titles and descriptions to Chinese
+    - Keep technical terms in English (Kubernetes, Docker, etc.)
+
+    ### Step 4: Open in Browser and Verify
+
+    Open the generated HTML files in the browser for the user to preview:
+
+    ```bash
+    open tmp/resume-<name>.html
+    open tmp/resume-<name>-zh.html
+    ```
+
+    ### Step 5: Inform User
+
+    Tell the user:
+    - Files are at `tmp/resume-<name>.html` and `tmp/resume-<name>-zh.html`
+    - Use Cmd+P / Ctrl+P in browser to print to PDF
+    - Ask if any adjustments are needed (content, layout, styling)
+
+    ## Parameters
+
+    | Parameter | Description | Example |
+    |-----------|-------------|---------|
+    | `<language>` | Language version to generate (en, zh, or both) | `en` |
+
+    ## Notes
+
+    - Design system from [Kami](https://github.com/tw93/Kami) by [@tw93](https://github.com/tw93) — MIT licensed
+    - TsangerJinKai02 font requires commercial license from tsanger.cn for non-personal use
+    - No build tools needed — pure HTML+CSS, browser renders and prints to PDF
+    - Charter font may not be installed locally; Google Fonts import provides it
+    - The `page-break-inside: avoid` on experience items prevents awkward breaks when printing multi-page resumes

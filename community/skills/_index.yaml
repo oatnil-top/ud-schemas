@@ -44,3 +44,11 @@ entries:
     category: development
     path: generate-learning-html/skill.yaml
     added: "2026-06-01"
+
+  - name: generate-resume-kami
+    description: "Generate professional HTML resumes using Kami design constraints (tw93/Kami). A4 print-ready, EN and ZH."
+    author: UnDercontrol
+    tags: [workflow, ai-gen, resume, design]
+    category: design
+    path: generate-resume-kami/skill.yaml
+    added: "2026-06-14"
