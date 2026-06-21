@@ -40,6 +40,16 @@
       "default": {},
       "description": "Extensible key-value store (JSONB). Reserved for future use: parameters, tool declarations, agent config."
     },
+    "path": {
+      "type": "string",
+      "default": "/",
+      "description": "Virtual folder path for tree organization. Auto-set to /system/skills/{name}/ on create/update. Resources uploaded to the same path are co-located with the skill in the explorer tree."
+    },
+    "file_path": {
+      "type": "string",
+      "readOnly": true,
+      "description": "Virtual file path for the skill content. Computed as /system/skills/{name}/{name}.md. Read-only, derived from the skill name."
+    },
     "editable": {
       "type": "boolean",
       "default": true,
