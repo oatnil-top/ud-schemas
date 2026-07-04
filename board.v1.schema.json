@@ -47,16 +47,55 @@
     "column": {
       "type": "object",
       "properties": {
+        "id": {
+          "type": "string",
+          "description": "Column identifier (e.g. \"col-todo\"). Assigned by the server when omitted; include it on updates to keep column identity stable."
+        },
         "name": {
           "type": "string",
           "description": "Column display name."
         },
         "query": {
           "type": "string",
-          "description": "SQL-like filter query for tasks in this column (e.g., \"status = 'todo'\", \"status = 'in-progress' AND tags CONTAINS 'urgent'\"). Actions are auto-derived from the query at runtime."
+          "description": "SQL-like filter query for tasks in this column (e.g., \"status = 'todo'\", \"status = 'in-progress' AND tags CONTAINS 'urgent'\"). On every create/update the server derives source=query actions from this query (e.g. \"status = 'todo'\" generates SET status on enter). Use dry_run=true (ud apply --dry-run) to preview the generated actions."
+        },
+        "actions": {
+          "type": "array",
+          "description": "Manual actions executed when a card enters or leaves this column, in addition to the auto-generated ones. Actions with source=query are derived server-side from the column query and should not be supplied.",
+          "items": { "$ref": "#/$defs/action" }
         }
       },
       "required": ["name"]
+    },
+    "action": {
+      "type": "object",
+      "properties": {
+        "field": {
+          "type": "string",
+          "description": "Field to update: \"status\", \"tags\", or a custom field like \"cf.priority\"."
+        },
+        "value": {
+          "type": "string",
+          "description": "Value to apply. Empty for clear operations."
+        },
+        "operation": {
+          "type": "string",
+          "enum": ["set", "add", "remove", "clear"],
+          "description": "set/clear for scalar fields, add/remove for array fields."
+        },
+        "trigger": {
+          "type": "string",
+          "enum": ["enter", "exit"],
+          "description": "When to execute: card enters or leaves the column."
+        },
+        "source": {
+          "type": "string",
+          "enum": ["query", "manual"],
+          "default": "manual",
+          "description": "query = auto-generated server-side from the column query (derived state, never supply); manual = user-defined."
+        }
+      },
+      "required": ["field", "operation", "trigger"]
     },
     "example": {
       "description": "Example board YAML:\n\napiVersion: ud/v1\nkind: Board\nspec:\n  name: Sprint Board\n  board_type: private\n  default_tags: [sprint-1]\n  columns:\n    - name: Backlog\n      query: \"status = 'todo'\"\n    - name: In Progress\n      query: \"status = 'in-progress'\"\n    - name: Review\n      query: \"status = 'pending'\"\n    - name: Done\n      query: \"status = 'done'\""
