@@ -276,7 +276,10 @@ ud query board <id|name> "status = 'todo'" --limit 20
 ud get skills
 
 # Read a skill prompt (get workflow instructions)
-ud prompt <skill-name>
+ud describe skill <skill-name>
+
+# Capture the skill body into a file (no metadata header)
+ud describe skill <skill-name> -o content > SKILL.md
 ```
 
 ### Task Connections
@@ -347,4 +350,4 @@ When asked "what should I work on?" or "give me a standup summary":
 - **Apply replaces entirely**: When updating, always include title, status, tags, board, and description
 - **Notes are ephemeral**: Use for progress updates. Refine the task description for permanent decisions.
 - **Never set status=done**: Always use `pending` — the human reviews and moves to `done`
-- **Use `ud prompt`**: Check for project-specific skills that may have additional workflow instructions
+- **Use `ud get skills`**: Check for project-specific skills that may have additional workflow instructions
