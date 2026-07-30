@@ -48,6 +48,10 @@
         "command": {
           "type": "string",
           "description": "Launch command override. Optional — defaults to 'claude --dangerously-skip-permissions'."
+        },
+        "cli": {
+          "type": "string",
+          "description": "Agent CLI to run THIS session on, by name ('codex') or UUID. Optional — overrides the agent's configured agent_cli_id for this dispatch only; the agent is never modified. An unknown name fails the apply (it never falls back to the default). Ignored when 'command' is set, since that specifies the launch command outright. Agent sessions only. This field is for programmatic dispatch; in a conversation, @mention the CLI beside the agent instead ('[@agent](mention://member/...) @codex do X')."
         }
       },
       "required": ["task_id"],
