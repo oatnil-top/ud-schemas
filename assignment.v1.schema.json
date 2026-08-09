@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/assignment.v1.schema.json",
+  "title": "UnDercontrol Assignment",
+  "description": "States who holds a task, via 'ud apply -f'. Uses the YAML envelope format (apiVersion/kind/spec). An assignment has no id of its own — the card is the identity, so applying the same document twice is a no-op and the file is safe to keep and re-run. One member vocabulary covers both kinds: a person and an agent are named the same way and assigned by the same document. To clear an assignment use 'ud delete assignment <task>' — there is no empty-assignee spelling.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Assignment" },
+    "metadata": {
+      "$ref": "resource.v1.schema.json#/$defs/metadata",
+      "description": "Optional, and carries no identity here — an assignment is keyed by its card, not by an id of its own. The CLI does accept 'metadata.id' as an alternate spelling of 'spec.task' so that describe → edit → apply reads like every other kind; this schema deliberately does not bless that form, because 'spec.task' is what both 'ud cook assignment' and 'ud describe assignment -o apply' emit."
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "The card being assigned: task UUID or short-id prefix. Required. Quote it — an all-digit short id such as '13940455' is a YAML integer when bare, and while the CLI tolerates that, quoting is the form every reader and validator agrees on."
+        },
+        "assignee": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Who holds the card: a person's username or email, an agent's name, or a user UUID — all four are strings, so this schema cannot narrow the type further; ambiguity between them is resolved by the CLI's member lookup, identically to 'ud patch task --assignee'. Required: omitting it is an error, not an unassign. Use 'ud delete assignment <task>' to clear. Reading an assignment back with '-o apply' writes a user UUID here, since that output is meant to be piped somewhere whose candidate names may differ."
+        }
+      },
+      "required": ["task", "assignee"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"]
+}
