@@ -1,0 +1,70 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/dataflow.v1.schema.json",
+  "title": "UnDercontrol Dataflow",
+  "description": "A dataflow diagram, via 'ud apply -f'. Uses the YAML envelope format (apiVersion/kind/metadata/spec). A diagram is a record, not a file: the graph JSON lives in the diagram itself and the name carries no '.dataflow.json' suffix. Identity is (owner, path, name), enforced as unique by the server, so a document with no 'metadata.id' still updates the diagram it names rather than creating a second one — the same file can be edited and re-applied indefinitely. Applying unchanged content writes nothing at all: the server compares a hash of the graph and treats a match as a no-op, so no version is recorded and the update timestamp does not move.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "Dataflow" },
+    "metadata": {
+      "$ref": "resource.v1.schema.json#/$defs/metadata",
+      "description": "'metadata.id' names an existing diagram directly and takes precedence over the (path, name) key; omit it and the key decides. 'metadata.tags' sets the diagram's tags."
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "The diagram's name, without a file extension — a suffix is an artefact of being a file, and this is not one. Together with 'path' it forms the identity a re-apply resolves against, so changing it creates a new diagram rather than renaming this one unless 'metadata.id' is also given."
+        },
+        "path": {
+          "type": "string",
+          "default": "/",
+          "description": "Virtual folder the diagram appears under in the explorer tree. Part of the identity key: the same name under two paths is two diagrams. Defaults to the root."
+        },
+        "data": {
+          "type": "string",
+          "description": "The graph as JSON text, stored byte for byte. MUST be written as a YAML block scalar ('data: |'), never spread into a YAML mapping: YAML decoding rewrites values on the way through — a leading zero is read as octal (0755 becomes 493), a trailing zero is dropped (1.10 becomes 1.1), and a bare run of digits stops being a string. The last one is the dangerous case, because the JSON text is identical either way and only the type changed. Mutually exclusive with 'dataFile'. Images must be referenced as resources ('resourceId' or 'resource://<uuid>'); a graph containing an inline 'data:' URI is rejected regardless of its size, and one version of a graph may not exceed 1 MiB."
+        },
+        "dataFile": {
+          "type": "string",
+          "description": "Path to a file holding the graph JSON, read and sent exactly as it is on disk. The same content rules as 'data' apply. Mutually exclusive with 'data' — giving both is an error rather than a precedence rule, so the ignored one cannot look effective. Resolved against the working directory of the process running 'ud', not against the location of this document, because a document piped in on stdin has no location of its own."
+        },
+        "entity_type": {
+          "type": "string",
+          "description": "Attach the new diagram to something as it is created — 'todolist' for a task. Only read on create; use the attachment endpoints to change it afterwards."
+        },
+        "entity_id": {
+          "type": "string",
+          "description": "The id of the entity named by 'entity_type'. Quote it: an all-digit short id is a YAML integer when bare."
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "default": {},
+          "description": "Extensible key-value store carried with the diagram."
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "identity_and_idempotency": {
+      "description": "(owner, path, name) is unique in the database, not merely by convention in the CLI. A create that would collide with an existing diagram is refused rather than silently updating it; 'ud apply' resolves the key first and issues an update when it hits, which is what makes re-applying an edited document update one diagram instead of growing a second."
+    },
+    "versions": {
+      "description": "Every write that actually changes the graph snapshots the previous content as a version, and versions are kept indefinitely. Changing only the name, path, tags or metadata does not record one — versions track the picture, not its labels. Restoring a version writes it back as a new revision rather than erasing what came after it, so the state you rolled away from remains in the history."
+    },
+    "images": {
+      "description": "A picture inside a diagram is a resource referenced by id, never bytes embedded in the graph. It therefore has its own owner, its own sharing state and its own lifecycle: deleting the diagram does not delete it, and it can be removed independently, at which point the node renders as unavailable."
+    },
+    "storage_accounting": {
+      "description": "A diagram's bytes live in the record, not in object storage, and do not count against the storage quota — the quota is object storage's ledger. This holds for the versions too."
+    }
+  }
+}

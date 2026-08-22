@@ -48,6 +48,7 @@ UnDercontrol uses **two file formats** — Markdown with YAML frontmatter for ta
 | [`project.v1`](./project.v1.schema.json) | Project with cwd, git remote, and board bindings | — |
 | [`workspace.v1`](./workspace.v1.schema.json) | Workspace session with task, daemon, and agent bindings | — |
 | [`assignment.v1`](./assignment.v1.schema.json) | Who holds a task — one member vocabulary for people and agents | — |
+| [`dataflow.v1`](./dataflow.v1.schema.json) | Dataflow diagram whose graph JSON lives in the record, with versions | [dataflow-example.yaml](./examples/dataflow-example.yaml) |
 
 ### AI & automation entities
 
