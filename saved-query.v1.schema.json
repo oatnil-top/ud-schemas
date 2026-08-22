@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/saved-query.v1.schema.json",
+  "title": "UnDercontrol SavedQuery Resource",
+  "description": "Schema for SavedQuery YAML resource files. A saved query is a named task filter; the same objects power the web app's Saved Queries view (/tasks/saved-queries).",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "SavedQuery" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the saved query."
+        },
+        "query_string": {
+          "type": "string",
+          "description": "The task query string this filter runs (e.g. \"status:in-progress tag:urgent\")."
+        }
+      },
+      "required": ["name", "query_string"]
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "example": {
+      "description": "Example saved query YAML:\n\napiVersion: ud/v1\nkind: SavedQuery\nspec:\n  name: Urgent work\n  query_string: \"status:in-progress tag:urgent\"\n\nRound-trip: `ud describe saved-query <id> -o apply` emits exactly id + name + query_string, so piping it back into `ud apply` is a no-op."
+    }
+  }
+}
