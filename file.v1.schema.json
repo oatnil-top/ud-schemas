@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/file.v1.schema.json",
+  "title": "UnDercontrol File",
+  "description": "An uploaded file, via 'ud apply -f'. Uses the YAML envelope format (apiVersion/kind/metadata/spec). A file is metadata plus bytes in object storage, and only the metadata is in this document: 'spec.contentFile' points at bytes on disk that are uploaded once, when the file is created. Identity is (owner, path, name), resolved by the CLI at apply time, so a document with no 'metadata.id' updates the file it names rather than creating a second one — unless two or more files already share that key, which is refused. The kind is 'File' while the table, the API routes and the 'resource://' protocol are still called resource; the permission layer has called this concept file since day one (file:upload, file:read, file:delete).",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "File" },
+    "metadata": {
+      "$ref": "resource.v1.schema.json#/$defs/metadata",
+      "description": "'metadata.id' names an existing file directly and takes precedence over the (path, name) key; a full UUID or an 8-character prefix. Omit it and the key decides. 'metadata.tags' is accepted as an alternative to 'spec.tags' — giving both is an error rather than a precedence rule, so the ignored one cannot look effective."
+    },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "description": "The file's name, including its extension — unlike a diagram, this really is a file and the extension is part of what it is. Together with 'path' it forms the identity a re-apply resolves against. It need not match the base name of 'contentFile': the document names the file, 'contentFile' only says where the bytes are. The MIME type is derived from this name, so calling it 'report.pdf' stores it as a PDF whatever the local file was called."
+        },
+        "path": {
+          "type": "string",
+          "default": "/",
+          "description": "Virtual folder the file appears under in the explorer tree. Part of the identity key: the same name under two folders is two files. Normalized before use with the same rules the server applies on write (unsafe characters become '-', leading and trailing dots, dashes and spaces are stripped), because the server's list filter compares paths with raw equality — an un-normalized path would match nothing and be read as 'no such file'. Omitting it and giving '/' mean the same folder."
+        },
+        "contentFile": {
+          "type": "string",
+          "description": "Path to the local file whose bytes are uploaded. Read on CREATE only. On a file that already exists it is IGNORED and a warning is printed, unless '--replace-content' is passed: nothing stored lets the CLI tell whether the local bytes differ from the uploaded ones (there is no content hash column), so re-uploading every time and skipping on equal size are both wrong in ways that lose data or lie in the receipt. Resolved against the working directory of the process running 'ud', not against the location of this document, because a document piped in on stdin has no location of its own. '--replace-content' posts the bytes inline and is for small files; replacing a large file means deleting it and applying again, which produces a new id."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags for categorization. Applied as a whole list: applying a document with fewer tags removes the ones it leaves out, and an empty list clears them. Omit the field entirely to leave the file's tags alone. Mutually exclusive with 'metadata.tags'."
+        },
+        "entity_type": {
+          "type": "string",
+          "description": "Attach the new file to something as it is created — 'todolist' for a task. Note the entity type is the storage-level name: a task is a 'todolist' here, the same seam 'ud upload resource --entity-type' has. Only read on create; use the attachment endpoints to change it afterwards."
+        },
+        "entity_id": {
+          "type": "string",
+          "description": "The id of the entity named by 'entity_type'. A task id may be an 8-character prefix. Quote it: an all-digit short id is a YAML integer when bare."
+        }
+      },
+      "required": ["name"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "identity_and_idempotency": {
+      "description": "(owner, path, name) is a CLI-side convention here, NOT a unique index — and it will not become one. 'ud upload resource' creates rows without checking for a duplicate name and legitimately does so every day; a unique index would start rejecting those uploads, which would be a change to the old path. So two files can share a key, and 'ud apply' refuses such a document (printing the candidate ids) rather than guessing which row it means. Exporting with '-o apply' writes 'metadata.id', so a document that has been round-tripped once is immune to this."
+    },
+    "idempotency_of_content": {
+      "description": "Applying the same document twice writes nothing: the key resolves to the existing file, every metadata field already matches so no PATCH is issued, and 'contentFile' is ignored. This is a statement about the METADATA only. Because no content hash is stored, a second apply after editing the local file also writes nothing — the bytes are not compared, they are simply not looked at. Passing '--replace-content' uploads unconditionally, which means re-running it overwrites the stored bytes with identical ones rather than detecting a match."
+    },
+    "three_states_of_a_lookup": {
+      "description": "Resolving the identity key has three outcomes, and the CLI keeps them apart: the file is there, the file is definitely not there, or the lookup did not succeed (server unreachable, authentication failed). Only the second creates. Reporting a failed lookup as 'not found' would let a single network blip create a duplicate of a file that already exists, with no unique index to catch it."
+    },
+    "storage_accounting": {
+      "description": "A file's bytes live in object storage and count against the storage quota, which is checked when the upload is prepared. Applying a File document creates the file through exactly the same prepare/upload/confirm path as 'ud upload resource', so it carries the same quota behaviour — apply introduces no quota semantics of its own. (Diagrams are exempt from the quota; files are not.)"
+    },
+    "deprecated_kind": {
+      "description": "'kind: Resource' is still accepted and behaves identically, with a deprecation warning. Older exports produced by 'ud describe resource <id> -o apply' use that form and keep working; new exports write 'kind: File'."
+    }
+  }
+}

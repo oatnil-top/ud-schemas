@@ -1,0 +1,27 @@
+apiVersion: ud/v1
+kind: File
+spec:
+  name: hero-mock.fig
+  path: /design/assets/
+  # Where the bytes are on disk, relative to the working directory `ud` runs in.
+  # Read on CREATE only: on a file that already exists this is ignored with a warning,
+  # because nothing stored says whether the local bytes differ from the uploaded ones.
+  # Pass --replace-content to upload it anyway (small files).
+  contentFile: ./hero-mock.fig
+  tags: [design, homepage]
+  # Attach it to a task as it is created. The entity type is the storage-level name:
+  # a task is a "todolist" here.
+  entity_type: todolist
+  entity_id: "bb0870cc"
+# Re-applying this file updates the same file: (owner, path, name) is the identity, so
+# no id is needed. Unlike a diagram, that key is NOT a unique index — `ud upload
+# resource` creates same-named rows every day — so if two files already match the key,
+# apply refuses and prints the candidate ids rather than editing whichever came first.
+#
+# Applying it unchanged writes nothing. That is a claim about the metadata: the bytes
+# are not compared, they are not looked at at all.
+#
+# Exporting writes metadata.id, which makes the document immune to that ambiguity:
+#   ud describe file 3f9c2a1b -o apply > hero-mock.yaml
+# The export carries no contentFile — it describes a file that already exists. Add one
+# back (with --replace-content) when you mean to change the bytes.
