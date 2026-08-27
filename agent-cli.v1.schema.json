@@ -29,7 +29,31 @@
     "builtin": {
       "type": "boolean",
       "default": false,
-      "description": "True for system agent CLIs. Built-in CLIs cannot be deleted."
+      "deprecated": true,
+      "description": "Deprecated. Formerly true for system-seeded CLIs; agent CLIs are now per-user rows and every row is fully editable by its owner. Kept read-only for compatibility and scheduled for removal."
+    },
+    "extra_options": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Optional preset argument variants for this CLI (e.g. model picks). Each option's args are appended verbatim after the command when an agent selects it. The list is data owned by the row's owner — editing it needs no release.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "description": "Display label shown in the options dropdown (e.g. 'Opus')."
+          },
+          "args": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "description": "The literal extra arguments appended after the command (e.g. '--model opus'). Plain flags and values only — shell metacharacters are rejected."
+          }
+        },
+        "required": ["label", "args"]
+      }
     },
     "owner_id": {
       "type": "string",
