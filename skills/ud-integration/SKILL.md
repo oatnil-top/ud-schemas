@@ -15,14 +15,16 @@ Manage tasks, track progress, and collaborate via kanban boards using the `ud` C
 
 ## Prerequisites
 
-- `ud` CLI installed — see [ud.oatnil.com](https://ud.oatnil.com) for installation options
-- Authenticated context configured:
+Setup is not described here — the official, always-current setup flow lives at
+[https://oatnil.com/agent-setup/prompt.md](https://oatnil.com/agent-setup/prompt.md)
+(fetch and follow it), and once the CLI is installed the tool checks itself:
 
 ```bash
-ud config get-contexts          # list available contexts
-ud config use-context <name>    # switch to target workspace
-ud get task --limit 1           # verify connection
+ud config onboarding            # what this machine still needs, with next commands
+ud config onboarding --json     # machine-readable: next_command / requires_human per check
 ```
+
+Multiple workspaces: `ud config get-contexts` / `ud config use-context <name>`.
 
 ## Core Concepts
 
