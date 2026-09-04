@@ -8,12 +8,16 @@ spec:
   # The graph MUST be a block scalar. Written as YAML structure instead, the parser
   # rewrites values on the way through — 0755 becomes 493, 1.10 becomes 1.1, and a bare
   # run of digits stops being a string — so the graph would not be stored as written.
+  #
+  # Every node "type" must be one the editor registers (ud-dataflow-diagram
+  # src/registry.ts). An unregistered type is NOT an error: the node renders as a
+  # blank box, silently — so a typo here fails only in front of the reader.
   data: |
     {
       "nodes": [
-        {"id": "n1", "type": "text", "position": {"x": 0, "y": 0}, "data": {"text": "Cart"}},
-        {"id": "n2", "type": "text", "position": {"x": 240, "y": 0}, "data": {"text": "Payment"}},
-        {"id": "n3", "type": "resource", "position": {"x": 480, "y": 0}, "data": {"resourceId": "8c4a1f92-0d3b-4e77-9a61-2f5b8c0d1e34"}}
+        {"id": "n1", "type": "shape", "position": {"x": 0, "y": 0}, "data": {"name": "Cart", "shape": "rounded-rectangle", "text": "Cart"}},
+        {"id": "n2", "type": "shape", "position": {"x": 240, "y": 0}, "data": {"name": "Payment", "shape": "rounded-rectangle", "text": "Payment"}},
+        {"id": "n3", "type": "resource", "position": {"x": 480, "y": 0}, "data": {"name": "Receipt", "resourceId": "8c4a1f92-0d3b-4e77-9a61-2f5b8c0d1e34", "collapsed": false}}
       ],
       "edges": [
         {"id": "e1", "source": "n1", "target": "n2"},
@@ -26,5 +30,5 @@ spec:
 # Pictures are referenced, never inlined — n3 above points at a resource by id. A graph
 # containing an inline `data:` URI is rejected whatever its size.
 #
-# For a graph too large to paste, swap `data` for a path (the two cannot both be given):
-#   dataFile: ./checkout-flow.json
+# The graph is always inline. (An earlier `dataFile: <path>` field is retired — a
+# document carrying it is refused, with the substitution to use named in the error.)
