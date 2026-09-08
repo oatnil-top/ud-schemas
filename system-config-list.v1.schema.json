@@ -2,14 +2,14 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://undercontrol.dev/schemas/system-config-list.v1.schema.json",
   "title": "UnDercontrol SystemConfigList Resource",
-  "description": "One instance's entire configuration as a single document. It is what `ud describe systemconfiglist -o apply` prints, what a person edits, and what `ud apply` feeds back — export and intake are the SAME shape on purpose, because a round trip that writes nothing is the property the resource is built around.\n\nMerge semantics, not convergence: a key the document does NOT mention is not asserted about, so apply leaves it alone and never deletes it. An export therefore carries every declared key (~63 on a real instance), and a full export and a one-key edit reach the server looking identical.\n\nEvery field except `value` is read-only. On apply a read-only field that MATCHES the instance is ignored; one that DIFFERS refuses the WHOLE document with zero writes. That is why they are exported at all — together they make the document a per-key staleness check, so no separate resourceVersion is needed. `source` is the one exception: it is exported but excluded from the comparison, because writing a key is what moves it (default -> admin), so a document that diffed on it could be applied exactly once.\n\nThe document carries NO plaintext secret in either direction: a secret key reports `valueMasked`/`hasValue` and never a `value`. The one way to SET a secret is for a human to type the plaintext into `value`.\n\nThere is no reset verb. \"Back to the default\" is written by copying the key's `default` into its `value`.",
+  "description": "One instance's entire configuration as a single document. It is what `ud describe systemconfiglist -o apply` prints, what a person edits, and what `ud apply` feeds back — export and intake are the SAME shape on purpose, because a round trip that writes nothing is the property the resource is built around.\n\nMerge semantics, not convergence: a key the document does NOT mention is not asserted about, so apply leaves it alone and never deletes it. An export therefore carries every declared key (~63 on a real instance), and a full export and a one-key edit reach the server looking identical.\n\nEvery field except `value` is read-only. On apply a read-only field that MATCHES the instance is ignored; one that DIFFERS refuses the WHOLE document with zero writes (409 CONFIG_READONLY_FIELD — a conflict with the state of THIS machine, not a malformed request). That is why they are exported at all — together they make the document a per-key staleness check, so no separate resourceVersion is needed. `setBy` is the one exception: it is exported but excluded from the comparison, because writing a key is what moves it (default -> admin), so a document that diffed on it could be applied exactly once.\n\nThe document carries NO plaintext secret in either direction: a secret key reports `valueMasked`/`hasValue` and never a `value`. The one way to SET a secret is for a human to type the plaintext into `value`.\n\nThere is no reset verb. \"Back to the default\" is written by copying the key's `default` into its `value`.",
   "type": "object",
   "properties": {
     "apiVersion": { "const": "ud/v1" },
     "kind": { "const": "SystemConfigList" },
-    "server": {
+    "forServer": {
       "type": "string",
-      "description": "REQUIRED machine assertion: the instance's own general.host_domain, as the server reports it. It exists so an agent holding the wrong context cannot apply a devbox document to production — the server compares it and refuses the whole document on a mismatch. Omitting it is not \"skip the check\"; it is a refusal."
+      "description": "REQUIRED machine assertion: the instance's own general.host_domain, as the instance reports it. It names the machine this document is FOR — it is NOT an address to connect to; the target instance is decided by your CLI context, and this field is the check on that. It exists so an agent holding the wrong context cannot apply a devbox document to production — the instance compares it and refuses the whole document on a mismatch. Omitting it is not \"skip the check\"; it is a refusal."
     },
     "spec": {
       "type": "object",
@@ -21,7 +21,7 @@
       "additionalProperties": { "$ref": "#/$defs/entry" }
     }
   },
-  "required": ["apiVersion", "kind", "server"],
+  "required": ["apiVersion", "kind", "forServer"],
   "additionalProperties": false,
   "$defs": {
     "entry": {
@@ -45,7 +45,7 @@
         },
         "valueMasked": {
           "type": "string",
-          "description": "Read-only. The current mask of a secret key that HAS a value and is not class=startup (a class=startup secret withholds even the last four characters). Fed back unchanged it is ignored; the server compares mask to mask, never mask to plaintext, so a round trip cannot overwrite a real key with its own mask."
+          "description": "Read-only. The current mask of a secret key that HAS a value and is not class=startup (a startup secret withholds even the last four characters). Fed back unchanged it is ignored; the server compares mask to mask, never mask to plaintext, so a round trip cannot overwrite a real key with its own mask."
         },
         "hasValue": {
           "type": "boolean",
@@ -59,9 +59,9 @@
           "enum": ["startup", "seedable", "runtime"],
           "description": "Read-only. `startup` is read once at boot (changing the row does nothing until restart), `seedable` seeds from the environment on first boot and is editable afterwards, `runtime` is live."
         },
-        "source": {
-          "enum": ["startup", "admin", "default"],
-          "description": "Read-only, and the ONE field excluded from the comparison: writing a key is what moves it (default -> admin), so an engine that diffed on it would accept an export exactly once and refuse it ever after. Exported because a reader needs to know where the current value came from."
+        "setBy": {
+          "enum": ["default", "env", "admin"],
+          "description": "Read-only, and the ONE field excluded from the comparison: writing a key is what moves it (default -> admin), so an engine that diffed on it would accept an export exactly once and refuse it ever after. Exported because a reader needs to know where the current value came from: `default` is nobody, `env` is the environment at boot, `admin` is a write through the admin UI or the API."
         },
         "readOnly": {
           "type": "boolean",
@@ -79,7 +79,7 @@
       "additionalProperties": false
     },
     "example": {
-      "description": "Example SystemConfigList YAML (a hand-written one-key edit — an export carries all ~63 keys with their full metadata):\n\napiVersion: ud/v1\nkind: SystemConfigList\nserver: http://localhost:19080\nspec:\n  # shorthand: `key: value` == `key: {value: value}`\n  integration.ocr.endpoint: http://ocr.example/v1\n  # full form, as an export emits it; the read-only fields are a staleness check\n  security.jwt.expiration_minutes:\n    value: \"1440\"\n    valueType: int\n    class: runtime\n    source: admin\n    envVar: JWT_EXPIRATION_MINUTES\n    default: \"60\"\n\nRound trip: `ud describe systemconfiglist -o apply | ud apply -f -` writes NOTHING and reports every key as ignored. `server` is required and is checked against the instance, so the same document cannot be applied to the wrong box."
+      "description": "Example SystemConfigList YAML (a hand-written one-key edit — an export carries all ~63 keys with their full metadata):\n\napiVersion: ud/v1\nkind: SystemConfigList\nforServer: http://localhost:19080\nspec:\n  # shorthand: `key: value` == `key: {value: value}`\n  integration.ocr.endpoint: http://ocr.example/v1\n  # full form, as an export emits it; the read-only fields are a staleness check\n  security.jwt.expiration_minutes:\n    value: \"1440\"\n    valueType: int\n    class: runtime\n    setBy: admin\n    envVar: JWT_EXPIRATION_MINUTES\n    default: \"60\"\n\nRound trip: `ud describe systemconfiglist -o apply | ud apply -f -` writes NOTHING and reports every key as ignored. `forServer` is required and is checked against the instance, so the same document cannot be applied to the wrong box."
     }
   }
 }
