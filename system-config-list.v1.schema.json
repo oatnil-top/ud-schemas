@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/system-config-list.v1.schema.json",
+  "title": "UnDercontrol SystemConfigList Resource",
+  "description": "One instance's entire configuration as a single document. It is what `ud describe systemconfiglist -o apply` prints, what a person edits, and what `ud apply` feeds back — export and intake are the SAME shape on purpose, because a round trip that writes nothing is the property the resource is built around.\n\nMerge semantics, not convergence: a key the document does NOT mention is not asserted about, so apply leaves it alone and never deletes it. An export therefore carries every declared key (~63 on a real instance), and a full export and a one-key edit reach the server looking identical.\n\nEvery field except `value` is read-only. On apply a read-only field that MATCHES the instance is ignored; one that DIFFERS refuses the WHOLE document with zero writes. That is why they are exported at all — together they make the document a per-key staleness check, so no separate resourceVersion is needed. `source` is the one exception: it is exported but excluded from the comparison, because writing a key is what moves it (default -> admin), so a document that diffed on it could be applied exactly once.\n\nThe document carries NO plaintext secret in either direction: a secret key reports `valueMasked`/`hasValue` and never a `value`. The one way to SET a secret is for a human to type the plaintext into `value`.\n\nThere is no reset verb. \"Back to the default\" is written by copying the key's `default` into its `value`.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "SystemConfigList" },
+    "server": {
+      "type": "string",
+      "description": "REQUIRED machine assertion: the instance's own general.host_domain, as the server reports it. It exists so an agent holding the wrong context cannot apply a devbox document to production — the server compares it and refuses the whole document on a mismatch. Omitting it is not \"skip the check\"; it is a refusal."
+    },
+    "spec": {
+      "type": "object",
+      "description": "Flat map of configuration key -> entry. Not partitioned into read/write zones: what happens to a field is decided by whether it DIFFERS from the instance, not by which section it sits in. Absent or empty is accepted and asserts nothing.",
+      "propertyNames": {
+        "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*(?:\\.[a-z0-9]+(?:_[a-z0-9]+)*)+$",
+        "description": "Dotted lower_snake segments, e.g. `security.jwt.expiration_minutes`. A key no definition declares is refused by name."
+      },
+      "additionalProperties": { "$ref": "#/$defs/entry" }
+    }
+  },
+  "required": ["apiVersion", "kind", "server"],
+  "additionalProperties": false,
+  "$defs": {
+    "entry": {
+      "description": "One key's state — either the full form an export emits, or the scalar shorthand `key: value` (equivalent to `key: {value: value}`) for a hand-written edit.",
+      "oneOf": [
+        { "$ref": "#/$defs/entryObject" },
+        { "$ref": "#/$defs/entryShorthand" }
+      ]
+    },
+    "entryShorthand": {
+      "description": "Shorthand: `key: value` means `key: {value: value}`. Intake only — an export always carries the full form, because an export carries metadata. An object is NOT shorthand; it is read as the full form, so a `json`-typed key must be written as `key: {value: {...}}`.",
+      "type": ["string", "number", "boolean", "array"]
+    },
+    "entryObject": {
+      "type": "object",
+      "description": "The full form. Every field here except `value` is read-only — declared so that a legal round-trip document validates. Presence is meaningful: `hasValue: false` is an assertion the server compares, while omitting `hasValue` is silence.",
+      "properties": {
+        "value": {
+          "type": ["string", "number", "boolean", "object", "array"],
+          "description": "The key's value. Exported for non-secret keys ALWAYS, including the empty string — \"\" is a real, deliberately-written value (a cleared setting), not an absence. Never exported for a secret; writing one is how a human sets it.\n\nThe scalar is interpreted by the key's DECLARED type, not by the type YAML or JSON inferred: `5` and `\"5\"` are both a valid int, and a string key given `5` stores \"5\". A string that arrived as a string is never re-canonicalised, which is what keeps a round trip exactly idempotent. Containers are accepted only for a `json` key. `null` is refused — it would be indistinguishable from omitting the key, which already means \"do not touch this\"."
+        },
+        "valueMasked": {
+          "type": "string",
+          "description": "Read-only. The current mask of a secret key that HAS a value and is not class=startup (a class=startup secret withholds even the last four characters). Fed back unchanged it is ignored; the server compares mask to mask, never mask to plaintext, so a round trip cannot overwrite a real key with its own mask."
+        },
+        "hasValue": {
+          "type": "boolean",
+          "description": "Read-only. Secret keys only — whether the key has a stored value at all. It is the only value-bearing field a class=startup secret gets. `false` is a real statement about a never-set secret and travels in the document."
+        },
+        "valueType": {
+          "enum": ["string", "int", "bool", "float", "json", "secret"],
+          "description": "Read-only. The declared type, which is what decides how `value` is interpreted. A key is secret exactly when this is `secret`."
+        },
+        "class": {
+          "enum": ["startup", "seedable", "runtime"],
+          "description": "Read-only. `startup` is read once at boot (changing the row does nothing until restart), `seedable` seeds from the environment on first boot and is editable afterwards, `runtime` is live."
+        },
+        "source": {
+          "enum": ["startup", "admin", "default"],
+          "description": "Read-only, and the ONE field excluded from the comparison: writing a key is what moves it (default -> admin), so an engine that diffed on it would accept an export exactly once and refuse it ever after. Exported because a reader needs to know where the current value came from."
+        },
+        "readOnly": {
+          "type": "boolean",
+          "description": "Read-only. Present only when true. A read-only key's `value` may be asserted (unchanged) but never changed — the refusal names the env var that would actually move it."
+        },
+        "envVar": {
+          "type": "string",
+          "description": "Read-only. The environment variable that sets this key, for the keys that declare one. For a read-only key this is the sole lever that can change it, so it travels in the document rather than sending the reader back to the source."
+        },
+        "default": {
+          "type": "string",
+          "description": "Read-only. The key's declared default, as text. Copying it into `value` is how \"back to the default\" is spelled — there is no reset verb; the server plans a row DELETION when the asserted value equals the default."
+        }
+      },
+      "additionalProperties": false
+    },
+    "example": {
+      "description": "Example SystemConfigList YAML (a hand-written one-key edit — an export carries all ~63 keys with their full metadata):\n\napiVersion: ud/v1\nkind: SystemConfigList\nserver: http://localhost:19080\nspec:\n  # shorthand: `key: value` == `key: {value: value}`\n  integration.ocr.endpoint: http://ocr.example/v1\n  # full form, as an export emits it; the read-only fields are a staleness check\n  security.jwt.expiration_minutes:\n    value: \"1440\"\n    valueType: int\n    class: runtime\n    source: admin\n    envVar: JWT_EXPIRATION_MINUTES\n    default: \"60\"\n\nRound trip: `ud describe systemconfiglist -o apply | ud apply -f -` writes NOTHING and reports every key as ignored. `server` is required and is checked against the instance, so the same document cannot be applied to the wrong box."
+    }
+  }
+}
