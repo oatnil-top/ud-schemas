@@ -45,19 +45,19 @@
         },
         "valueMasked": {
           "type": "string",
-          "description": "Read-only. The current mask of a secret key that HAS a value and is not class=startup (a startup secret withholds even the last four characters). Fed back unchanged it is ignored; the server compares mask to mask, never mask to plaintext, so a round trip cannot overwrite a real key with its own mask."
+          "description": "Read-only. The current mask of a secret key that HAS a value and is not settableFrom=boot-only (a boot-only secret withholds even the last four characters). Fed back unchanged it is ignored; the server compares mask to mask, never mask to plaintext, so a round trip cannot overwrite a real key with its own mask."
         },
         "hasValue": {
           "type": "boolean",
-          "description": "Read-only. Secret keys only — whether the key has a stored value at all. It is the only value-bearing field a class=startup secret gets. `false` is a real statement about a never-set secret and travels in the document."
+          "description": "Read-only. Secret keys only — whether the key has a stored value at all. It is the only value-bearing field a settableFrom=boot-only secret gets. `false` is a real statement about a never-set secret and travels in the document."
         },
         "valueType": {
           "enum": ["string", "int", "bool", "float", "json", "secret"],
           "description": "Read-only. The declared type, which is what decides how `value` is interpreted. A key is secret exactly when this is `secret`."
         },
-        "class": {
-          "enum": ["startup", "seedable", "runtime"],
-          "description": "Read-only. `startup` is read once at boot (changing the row does nothing until restart), `seedable` seeds from the environment on first boot and is editable afterwards, `runtime` is live."
+        "settableFrom": {
+          "enum": ["boot-only", "env-or-admin", "admin-only"],
+          "description": "Read-only. Where this key can be written FROM. `boot-only` is read once at boot, so only the environment (or a flag) moves it and only across a restart; `env-or-admin` seeds from the environment on first boot and is editable by an admin afterwards; `admin-only` has no environment equivalent and is live. The instance's own type is still called ConfigClass internally, with the values startup/seedable/runtime; the contract spells it this way because `class` alone does not say what is being classified, and `seedable` is an in-house word."
         },
         "setBy": {
           "enum": ["default", "env", "admin"],
@@ -79,7 +79,7 @@
       "additionalProperties": false
     },
     "example": {
-      "description": "Example SystemConfigList YAML (a hand-written one-key edit — an export carries all ~63 keys with their full metadata):\n\napiVersion: ud/v1\nkind: SystemConfigList\nforServer: http://localhost:19080\nspec:\n  # shorthand: `key: value` == `key: {value: value}`\n  integration.ocr.endpoint: http://ocr.example/v1\n  # full form, as an export emits it; the read-only fields are a staleness check\n  security.jwt.expiration_minutes:\n    value: \"1440\"\n    valueType: int\n    class: runtime\n    setBy: admin\n    envVar: JWT_EXPIRATION_MINUTES\n    default: \"60\"\n\nRound trip: `ud describe systemconfiglist -o apply | ud apply -f -` writes NOTHING and reports every key as ignored. `forServer` is required and is checked against the instance, so the same document cannot be applied to the wrong box."
+      "description": "Example SystemConfigList YAML (a hand-written one-key edit — an export carries all ~63 keys with their full metadata):\n\napiVersion: ud/v1\nkind: SystemConfigList\nforServer: http://localhost:19080\nspec:\n  # shorthand: `key: value` == `key: {value: value}`\n  integration.ocr.endpoint: http://ocr.example/v1\n  # full form, as an export emits it; the read-only fields are a staleness check\n  security.jwt.expiration_minutes:\n    value: \"1440\"\n    valueType: int\n    settableFrom: admin-only\n    setBy: admin\n    envVar: JWT_EXPIRATION_MINUTES\n    default: \"60\"\n\nRound trip: `ud describe systemconfiglist -o apply | ud apply -f -` writes NOTHING and reports every key as ignored. `forServer` is required and is checked against the instance, so the same document cannot be applied to the wrong box."
     }
   }
 }
