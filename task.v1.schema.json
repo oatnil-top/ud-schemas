@@ -21,9 +21,9 @@
         },
         "status": {
           "type": "string",
-          "enum": ["todo", "in-progress", "pending", "stale", "done", "archived"],
+          "enum": ["", "todo", "in-progress", "pending", "stale", "done", "archived"],
           "default": "todo",
-          "description": "Task status. Canonical values use hyphens (e.g. 'in-progress'). Clients should normalize on read: 'in_progress', 'InProgress', 'IN_PROGRESS' all map to 'in-progress'."
+          "description": "Task status, or the empty string for a document.\n\nThe empty string \"\" is a legal value and means \"no workflow status\" — the card is a document, not a unit of work. A document shows no status control beside its title, and it lands in no default kanban column (those are equality queries on a real status), so to see documents you add a column or query with status = ''. Making a card a document is just writing this one field (including done -> document); the old value is not preserved anywhere.\n\nThree states on write: ABSENT means \"leave it alone\" — create defaults to 'todo', update keeps the current value, so a client that never sends status behaves exactly as before; an explicit \"\" makes the card a document; anything outside the enum is rejected.\n\nCanonical values use hyphens (e.g. 'in-progress'). Clients should normalize on read: 'in_progress', 'InProgress', 'IN_PROGRESS' all map to 'in-progress'."
         },
         "tags": {
           "type": "array",
