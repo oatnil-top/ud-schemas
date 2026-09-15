@@ -93,11 +93,6 @@
       "type": "string",
       "description": "Agent CLI name (resolved to agent_cli_id). Convenience alias — use 'claude', 'aider', etc."
     },
-    "is_builtin": {
-      "type": "boolean",
-      "default": false,
-      "description": "True for system agents (e.g., @ud). Built-in agents cannot be deleted."
-    },
     "principles": {
       "type": "string",
       "readOnly": true,
