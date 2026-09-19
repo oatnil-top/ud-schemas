@@ -95,8 +95,7 @@
     },
     "principles": {
       "type": "string",
-      "readOnly": true,
-      "description": "Owner-written red lines, re-sent to this agent on every prompt the server hands it. Read-only on this face: no apply handler reads it, and the agent update endpoint has no principles field, so an apply round-trip can never clear it. It is written only through the dedicated owner-only endpoint PUT /agents/:id/principles, which requires a change note and journals every edit; read the journal with 'ud describe agent <name> --principles-history'."
+      "description": "Owner-written red lines, re-sent to this agent on every prompt the server hands it. An ordinary writable field: set it with 'ud apply' like any other agent field, and 'ud describe agent <name> -o apply' round-trips it. Only the owner may change it; an agent cannot rewrite its own red lines."
     }
   },
   "required": ["name"]
