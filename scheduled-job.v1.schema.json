@@ -50,7 +50,7 @@
       "properties": {
         "title": {
           "type": "string",
-          "description": "(task_creation) Task title template. Supports {{date}}, {{week}}, {{month}}, {{year}}, {{dow}}."
+          "description": "(task_creation) Task title template. Variables: {{date}}, {{week}}, {{month}}, {{year}}, {{dow}}; each takes an optional offset ({{month-1}}, {{date+7d}}, {{date-1w}}, {{date-1m}}; a bare number is in the variable's own unit) and an optional Go layout after a colon ({{month-1:2006-01}}, {{date:Jan 2}}). {{prev_month}} is {{month-1:2006-01}}. Month offsets are calendar months."
         },
         "description": {
           "type": "string",
@@ -64,6 +64,28 @@
         "deadline": {
           "type": "string",
           "description": "(task_creation, ai_task_summary) Relative deadline: '+1d', '+7d', 'end_of_week', 'end_of_month'."
+        },
+        "path": {
+          "type": "string",
+          "description": "(task_creation) Folder the created task lands in, e.g. /personal/finance/{{prev_month}}. Template variables expand like the title."
+        },
+        "project_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "(task_creation) Project ids the created task belongs to (written as ud.projects)."
+        },
+        "linked_to_ids": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "(task_creation) Task ids the created task is linked to, both directions."
+        },
+        "assignee": {
+          "type": "string",
+          "description": "(task_creation) Member to assign the created task to: user id (the ud CLI also accepts a member name)."
+        },
+        "status": {
+          "type": "string",
+          "description": "(task_creation) Status of the created task. Omitted: todo. Empty string: a document (no status)."
         },
         "query": {
           "type": "string",
