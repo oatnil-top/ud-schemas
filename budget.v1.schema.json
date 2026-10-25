@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://undercontrol.dev/schemas/budget.v1.schema.json",
   "title": "UnDercontrol Budget Resource",
-  "description": "Schema for budget YAML resource files. Budgets track planned spending with recurring plans and one-time adjustments.",
+  "description": "Schema for budget YAML resource files. Budgets track planned spending with recurring plans and one-time adjustments. Applying an existing budget only appends: plans and adjustments missing on the server are added, nothing is deleted, and initial_amount / starts_at cannot be changed. All amounts are currently stored in CNY; the ud CLI refuses any other currency rather than storing it as CNY.",
   "type": "object",
   "properties": {
     "apiVersion": { "const": "ud/v1" },
@@ -15,9 +15,14 @@
           "type": "string",
           "description": "Budget name (e.g., 'Groceries', 'Rent')."
         },
+        "initial_amount": {
+          "$ref": "resource.v1.schema.json#/$defs/money",
+          "description": "Opening balance of the budget. Defaults to 0. Cannot be changed after creation: record later changes under adjustments."
+        },
         "amount": {
           "$ref": "resource.v1.schema.json#/$defs/money",
-          "description": "Initial budget amount."
+          "deprecated": true,
+          "description": "Deprecated. Older documents used this as both the plan amount and the opening balance, which opened the budget with an extra period's money. Now: the plan amount when plans is empty, ignored when plans is given, never the opening balance. Use plans and initial_amount."
         },
         "starts_at": {
           "type": "string",
@@ -38,7 +43,7 @@
           }
         }
       },
-      "required": ["name", "amount", "starts_at"]
+      "required": ["name", "starts_at"]
     }
   },
   "required": ["apiVersion", "kind", "spec"],
@@ -86,7 +91,7 @@
       "required": ["amount", "adjustment_date"]
     },
     "example": {
-      "description": "Example budget YAML:\n\napiVersion: ud/v1\nkind: Budget\nmetadata:\n  tags: [food]\nspec:\n  name: Groceries\n  amount:\n    amount: 500.00\n    currency: USD\n  starts_at: 2025-01-01\n  plans:\n    - amount:\n        amount: 500.00\n        currency: USD\n      frequency: monthly\n      effective_from: 2025-01-01\n      reason: Initial monthly budget"
+      "description": "Example budget YAML:\n\napiVersion: ud/v1\nkind: Budget\nmetadata:\n  tags: [food]\nspec:\n  name: Groceries\n  initial_amount:\n    amount: 0\n    currency: CNY\n  starts_at: \"2025-01-01\"\n  plans:\n    - amount:\n        amount: 500.00\n        currency: CNY\n      frequency: monthly\n      effective_from: \"2025-01-01\"\n      reason: Initial monthly budget\n  adjustments:\n    - amount:\n        amount: 120.00\n        currency: CNY\n      adjustment_date: \"2025-03-15\"\n      reason: Birthday gift"
     }
   }
 }

@@ -4,14 +4,20 @@ metadata:
   tags: [food]
 spec:
   name: Groceries
-  amount:
-    amount: 500.00
-    currency: USD
-  starts_at: 2025-01-01
+  initial_amount:
+    amount: 0
+    currency: CNY
+  starts_at: "2025-01-01"
   plans:
     - amount:
         amount: 500.00
-        currency: USD
+        currency: CNY
       frequency: monthly
-      effective_from: 2025-01-01
+      effective_from: "2025-01-01"
       reason: Initial monthly budget
+  adjustments:
+    - amount:
+        amount: 120.00
+        currency: CNY
+      adjustment_date: "2025-03-15"
+      reason: Birthday gift
