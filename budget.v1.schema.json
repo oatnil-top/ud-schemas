@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://undercontrol.dev/schemas/budget.v1.schema.json",
   "title": "UnDercontrol Budget Resource",
-  "description": "Schema for budget YAML resource files. Budgets track planned spending with recurring plans and one-time adjustments. Applying an existing budget only appends: plans and adjustments missing on the server are added, nothing is deleted, and initial_amount / starts_at cannot be changed. All amounts are currently stored in CNY; the ud CLI refuses any other currency rather than storing it as CNY.",
+  "description": "Schema for budget YAML resource files. Budgets track planned spending with recurring plans and one-time adjustments. Applying an existing budget only appends: plans and adjustments missing on the server are added, nothing is deleted, and initial_amount / starts_at cannot be changed. A budget has one currency (ISO-4217, e.g. CNY or SGD; CNY when none is named): every amount in the document must name the same one, and it cannot be changed after creation.",
   "type": "object",
   "properties": {
     "apiVersion": { "const": "ud/v1" },
