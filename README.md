@@ -50,7 +50,7 @@ UnDercontrol uses **two file formats** — Markdown with YAML frontmatter for ta
 | [`assignment.v1`](./assignment.v1.schema.json) | Who holds a task — one member vocabulary for people and agents | — |
 | [`dataflow.v1`](./dataflow.v1.schema.json) | Dataflow diagram whose graph JSON lives in the record, with versions | [dataflow-example.yaml](./examples/dataflow-example.yaml) |
 | [`file.v1`](./file.v1.schema.json) | Uploaded file — metadata in the document, bytes in object storage | [file-example.yaml](./examples/file-example.yaml) |
-| [`timeblock.v1`](./timeblock.v1.schema.json) | A scheduled sitting on a task — the block the calendar draws between start and end | [timeblock-example.yaml](./examples/timeblock-example.yaml) |
+| [`timeslot.v1`](./timeslot.v1.schema.json) | A scheduled sitting on a task — the slot the calendar draws between start and end | [timeslot-example.yaml](./examples/timeslot-example.yaml) |
 
 ### AI & automation entities
 
