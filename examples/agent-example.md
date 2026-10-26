@@ -1,7 +1,6 @@
 ---
 name: pr-reviewer
 display_name: PR Reviewer
-triggers: [manual, on_mention]
 session_close: keep_pending
 daemon_mode: dynamic
 skills: [simplify]

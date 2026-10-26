@@ -3,7 +3,6 @@ kind: Agent
 spec:
   name: poker-dealer
   display_name: "德州扑克荷官"
-  triggers: [on_mention]
   session_close: keep_pending
   daemon_mode: dynamic
   skills: [ud-cli, texas-holdem]

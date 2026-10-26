@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://undercontrol.dev/schemas/agent.v1.schema.json",
   "title": "UnderControl Agent",
-  "description": "Schema for UnderControl AI agent entities. Agents are autonomous workers that run workspace sessions with delegated access. They have prompts (soul), skills, and trigger conditions.",
+  "description": "Schema for UnDercontrol AI agent entities. Agents are autonomous workers that run workspace sessions with delegated access. They have prompts (soul) and skills. Every agent can be @mentioned and started by hand.",
   "type": "object",
   "properties": {
     "id": {
@@ -31,15 +31,6 @@
       "items": { "type": "string" },
       "default": [],
       "description": "Skill names to inject into the agent's context when it starts a workspace session."
-    },
-    "triggers": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "enum": ["manual", "on_mention"]
-      },
-      "default": ["manual"],
-      "description": "Conditions that trigger the agent to start a workspace session. on_mention: an @mention of the agent in a comment, or a reply in that thread. manual: started by hand only. Assigning a card to an agent does not start a session."
     },
     "session_close": {
       "type": "string",

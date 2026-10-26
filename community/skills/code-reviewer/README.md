@@ -36,7 +36,6 @@ kind: Agent
 spec:
   name: my-reviewer
   skills: [code-reviewer, ud-cli]
-  triggers: [on_mention]
   prompt: "Review PRs assigned to you."
 EOF
 ```

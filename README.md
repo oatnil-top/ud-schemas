@@ -58,7 +58,7 @@ UnDercontrol uses **two file formats** — Markdown with YAML frontmatter for ta
 |--------|-------------|
 | [`skill.v1`](./skill.v1.schema.json) | Capability prompt that defines what a user or agent can do |
 | [`prompt.v1`](./prompt.v1.schema.json) | Instruction template with `{{taskId}}` variable substitution |
-| [`agent.v1`](./agent.v1.schema.json) | Autonomous AI worker with soul prompt, skills, and trigger conditions |
+| [`agent.v1`](./agent.v1.schema.json) | Autonomous AI worker with soul prompt and skills |
 | [`agent-cli.v1`](./agent-cli.v1.schema.json) | Launch command configuration for agents in workspace sessions |
 | [`daemon.v1`](./daemon.v1.schema.json) | Background process that connects via SSE and spawns agent sessions |
 | [`scheduled-job.v1`](./scheduled-job.v1.schema.json) | Scheduled job with cron expression, timezone, and typed payload |
@@ -131,7 +131,6 @@ spec:
   name: pr-reviewer
   display_name: "PR Reviewer"
   skills: [code-reviewer, ud-cli]
-  triggers: [on_mention]
   prompt: |
     You review the pull request linked from the card you are mentioned on...
 ```
