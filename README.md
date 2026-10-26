@@ -131,9 +131,9 @@ spec:
   name: pr-reviewer
   display_name: "PR Reviewer"
   skills: [code-reviewer, ud-cli]
-  triggers: [on_mention, on_assign]
+  triggers: [on_mention]
   prompt: |
-    You review pull requests assigned to you...
+    You review the pull request linked from the card you are mentioned on...
 ```
 
 Multiple resources can be combined in a single file using `---` separators. See the [`examples/`](./examples/) directory for complete examples.

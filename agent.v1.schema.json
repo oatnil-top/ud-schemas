@@ -36,10 +36,10 @@
       "type": "array",
       "items": {
         "type": "string",
-        "enum": ["manual", "on_mention", "on_assign", "on_subscribe"]
+        "enum": ["manual", "on_mention"]
       },
       "default": ["manual"],
-      "description": "Conditions that trigger the agent to start a workspace session."
+      "description": "Conditions that trigger the agent to start a workspace session. on_mention: an @mention of the agent in a comment, or a reply in that thread. manual: started by hand only. Assigning a card to an agent does not start a session."
     },
     "session_close": {
       "type": "string",
