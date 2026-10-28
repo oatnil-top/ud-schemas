@@ -22,7 +22,7 @@
     },
     "job_type": {
       "type": "string",
-      "enum": ["task_creation", "ai_task_summary", "database_backup", "report_generation", "custom_webhook", "preset_data_cleanup"],
+      "enum": ["task_creation", "ai_task_summary", "database_backup", "report_generation", "custom_webhook", "preset_data_cleanup", "wake_agent_session", "conversation_message"],
       "description": "Type of job to execute. Determines which payload fields are relevant."
     },
     "cron_expression": {
