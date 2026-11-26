@@ -34,6 +34,15 @@
         "occurred_at": {
           "type": "string",
           "description": "When the expense occurred. Accepts YYYY-MM-DD or ISO 8601."
+        },
+        "recurring_expense_id": {
+          "type": "string",
+          "description": "Recurring expense (recurring-expense.v1) UUID or prefix this payment belongs to. Omitted on read when the expense belongs to no plan. On update, omitted keeps the link and \"\" removes it."
+        },
+        "recurring_periods": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How many periods of that plan this payment settles, oldest first. Default 1; 0 = belongs to the plan but settles no period (a fee, a deposit). Omitted on read when the expense belongs to no plan."
         }
       },
       "required": ["amount"]
