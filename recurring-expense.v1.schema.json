@@ -44,11 +44,11 @@
         },
         "ends_at": {
           "type": "string",
-          "description": "Calendar date (YYYY-MM-DD) after which no period is due: the last day of an installment or fixed-term plan. Omit for an open-ended subscription. On update, \"\" clears it."
+          "description": "Calendar date (YYYY-MM-DD): the last day covered, not the last payment date; every period starting on or before this day counts. A plan billed in arrears is therefore paid once more after it. Omit for an open-ended subscription. On update, \"\" clears it."
         },
         "committed_until": {
           "type": "string",
-          "description": "Calendar date (YYYY-MM-DD) the plan is locked in until: leaving earlier costs exit_fee. Omit when you can cancel any time. On update, \"\" clears it."
+          "description": "Calendar date (YYYY-MM-DD): the last day of the contract lock-in; every period starting on or before this day is locked in, and leaving earlier costs exit_fee. Omit when you can cancel any time. On update, \"\" clears it."
         },
         "exit_fee": {
           "$ref": "#/$defs/exit_fee"
@@ -196,12 +196,14 @@
         "settled_expected_amount": { "type": "number", "description": "What the settled periods were expected to cost ..." },
         "paid_amount": { "type": "number", "description": "... next to what the linked expenses actually paid." },
         "current_amount": { "type": "number", "description": "Per-period price in force as of as_of." },
-        "next_due_date": { "type": "string" },
+        "next_due_date": { "type": "string", "description": "Equal to last_due_date when the next period is the plan's last one." },
         "next_amount": { "type": "number" },
         "committed_periods": { "type": "integer", "description": "Periods inside the lock-in." },
         "committed_remaining_periods": { "type": "integer", "description": "Locked-in periods not yet due." },
         "committed_remaining_amount": { "type": "number" },
         "exit_cost_today": { "type": "number", "description": "What leaving on as_of would cost under exit_fee." },
+        "total_periods": { "type": "integer", "description": "All periods of a plan with an end (ends_at, or ended). Absent when the plan has no end. A plan ended as completed or terminated_early has no period due after its end day; one ended as cancelled still bills a period that had already started." },
+        "last_due_date": { "type": "string", "description": "Due date of the plan's last period. Absent when the plan has no end or no period at all." },
         "next_price_change": {
           "type": "object",
           "properties": {
