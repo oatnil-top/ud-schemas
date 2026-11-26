@@ -45,6 +45,7 @@ UnDercontrol uses **two file formats** — Markdown with YAML frontmatter for ta
 | [`account.v1`](./account.v1.schema.json) | Financial account with balance | [account-example.yaml](./examples/account-example.yaml) |
 | [`expense.v1`](./expense.v1.schema.json) | Spending transaction linked to budget/account | [expense-example.yaml](./examples/expense-example.yaml) |
 | [`income.v1`](./income.v1.schema.json) | Income from various sources | [income-example.yaml](./examples/income-example.yaml) |
+| [`recurring-expense.v1`](./recurring-expense.v1.schema.json) | Plan of a series of payments (subscription, contract, installment); each payment is an Expense pointing at it | [recurring-expense-example.yaml](./examples/recurring-expense-example.yaml) |
 | [`project.v1`](./project.v1.schema.json) | Project with cwd, git remote, and board bindings | — |
 | [`workspace.v1`](./workspace.v1.schema.json) | Workspace session with task, daemon, and agent bindings | — |
 | [`assignment.v1`](./assignment.v1.schema.json) | Who holds a task — one member vocabulary for people and agents | — |

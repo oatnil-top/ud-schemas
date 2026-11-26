@@ -1,0 +1,20 @@
+# An 18-month phone contract (made-up numbers): locked in until 2028-07-07, leaving early costs a share of 540.00.
+# Each real payment is an ordinary Expense with recurring_expense_id pointing here
+# (see expense-example.yaml); due / pending periods are derived on read.
+apiVersion: ud/v1
+kind: RecurringExpense
+metadata:
+  tags: [phone]
+spec:
+  name: Acme Mobile phone contract
+  vendor: Acme Mobile
+  currency: SGD
+  starts_at: "2027-01-08"
+  first_due: "2027-02-08"
+  frequency: {unit: month, interval: 1}
+  committed_until: "2028-07-07"
+  exit_fee: {base: 540.00, mode: prorata_remaining}
+  terms:
+    - {amount: 29.90, effective_from: "2027-01-08"}
+    - {amount: 44.90, effective_from: "2027-02-08", reason: "launch discount ends"}
+    - {amount: 49.90, effective_from: "2028-07-08", reason: "loyalty discount ends"}

@@ -1,0 +1,243 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://undercontrol.dev/schemas/recurring-expense.v1.schema.json",
+  "title": "UnDercontrol RecurringExpense Resource",
+  "description": "Schema for recurring expense YAML resource files. A recurring expense is the PLAN of a series of payments (a subscription, a phone contract, an installment): what it costs per period, how often, until when, and how long it is locked in. It is not money spent and never counts toward a total. Each real payment is an ordinary Expense whose spec.recurring_expense_id points back at the plan, and spec.recurring_periods says how many periods it settles. Periods are never stored: due, settled and pending counts are derived on every read (spec.schedule). Subscription, contract and installment are not a field: they are which of ends_at and committed_until are set.",
+  "type": "object",
+  "properties": {
+    "apiVersion": { "const": "ud/v1" },
+    "kind": { "const": "RecurringExpense" },
+    "metadata": { "$ref": "resource.v1.schema.json#/$defs/metadata" },
+    "spec": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "What this plan is (e.g., 'Acme Mobile phone contract', 'Netflix')."
+        },
+        "vendor": {
+          "type": "string",
+          "maxLength": 255,
+          "description": "Who is paid."
+        },
+        "currency": {
+          "type": "string",
+          "description": "ISO-4217 currency of every amount in the plan (e.g., SGD, USD, CNY)."
+        },
+        "starts_at": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) the plan starts, e.g. the contract signing day."
+        },
+        "first_due": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) of the first payment. Later due dates step from here by frequency; a day past the end of a month is clamped to its last day."
+        },
+        "frequency": {
+          "$ref": "#/$defs/frequency"
+        },
+        "terms": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Price segments, each the per-period amount from effective_from (inclusive) until effective_to or the next segment; a day no segment covers costs 0. A price change is a new segment, not an edit. On update the whole list is replaced.",
+          "items": { "$ref": "#/$defs/price_term" }
+        },
+        "ends_at": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) after which no period is due: the last day of an installment or fixed-term plan. Omit for an open-ended subscription. On update, \"\" clears it."
+        },
+        "committed_until": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) the plan is locked in until: leaving earlier costs exit_fee. Omit when you can cancel any time. On update, \"\" clears it."
+        },
+        "exit_fee": {
+          "$ref": "#/$defs/exit_fee"
+        },
+        "default_budget_id": {
+          "type": "string",
+          "description": "Budget UUID a payment of this plan is usually booked to. Only prefills a new payment; it is not a link."
+        },
+        "default_pay_account": {
+          "type": "string",
+          "description": "Account UUID a payment of this plan is usually paid from. Only prefills a new payment."
+        },
+        "possession_id": {
+          "type": "string",
+          "description": "Possession UUID this plan belongs to (the phone a contract came with). One possession can carry several plans."
+        },
+        "notes": {
+          "type": "string",
+          "description": "Free text."
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Free-form key-value data.",
+          "additionalProperties": true
+        },
+        "status": {
+          "type": "string",
+          "enum": ["active", "ended"],
+          "description": "active, or ended. A new plan is always active. Applying status: ended with ended_at and end_reason to an active plan ends it (unsubscribed, paid off, terminated early); an ended plan cannot be reopened."
+        },
+        "ended_at": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) the plan ended. Required with status: ended; no period starting after it is due."
+        },
+        "end_reason": {
+          "type": "string",
+          "enum": ["completed", "cancelled", "terminated_early"],
+          "description": "Why the plan ended: completed (paid off / ran its course), cancelled (unsubscribed), terminated_early (left a lock-in, exit fee due). Required with status: ended."
+        },
+        "owner_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "User UUID that owns the plan."
+        },
+        "group_id": {
+          "type": "string",
+          "readOnly": true,
+          "description": "Group UUID the plan is shared to, if any. Sharing is its own channel, not part of the apply document."
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time",
+          "readOnly": true
+        },
+        "schedule": {
+          "$ref": "#/$defs/schedule"
+        },
+        "attention": {
+          "type": "array",
+          "readOnly": true,
+          "description": "Why the plan deserves a look as of schedule.as_of: periods not yet recorded, a price change within 30 days (ignored when under 1.00 per month and under 5%), a renewal, the end of the lock-in, the end of the plan. Empty when nothing needs a look.",
+          "items": { "$ref": "#/$defs/attention_item" }
+        },
+        "payments": {
+          "type": "array",
+          "readOnly": true,
+          "description": "The expenses that point at this plan, as the detail view shows them. Only on a single-plan read.",
+          "items": { "$ref": "#/$defs/payment" }
+        }
+      },
+      "required": ["name", "currency", "starts_at", "first_due", "frequency", "terms"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["apiVersion", "kind", "spec"],
+  "$defs": {
+    "frequency": {
+      "type": "object",
+      "description": "Every <interval> <unit>s.",
+      "properties": {
+        "unit": { "type": "string", "enum": ["week", "month", "year"] },
+        "interval": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "required": ["unit"],
+      "additionalProperties": false
+    },
+    "price_term": {
+      "type": "object",
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Per-period amount in major units of spec.currency (44.90)."
+        },
+        "effective_from": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) this price applies from. A period costs the price in force on the day it STARTS (starts_at plus n periods), not on its due date: with starts_at 2027-01-08 and first_due 2027-02-08, the period due 2027-02-08 started 2027-01-08."
+        },
+        "effective_to": {
+          "type": "string",
+          "description": "Calendar date (YYYY-MM-DD) this price applies until. Omit to run until the next segment or forever."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why the price is what it is (e.g., 'promo ends')."
+        }
+      },
+      "required": ["amount", "effective_from"],
+      "additionalProperties": false
+    },
+    "exit_fee": {
+      "type": "object",
+      "description": "What leaving before committed_until costs. Nothing after committed_until. On update, an empty mode clears the rule.",
+      "properties": {
+        "base": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Amount in major units of spec.currency the mode works from."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["fixed", "prorata_remaining", "remaining_payments", ""],
+          "description": "fixed: base, whenever you leave. prorata_remaining: base scaled by the share of locked-in periods still to come. remaining_payments: the sum of the locked-in periods still to come (base unused)."
+        }
+      },
+      "required": ["mode"],
+      "additionalProperties": false
+    },
+    "schedule": {
+      "type": "object",
+      "readOnly": true,
+      "description": "Derived on every read, never stored. Amounts in major units of spec.currency.",
+      "properties": {
+        "as_of": { "type": "string", "description": "The calendar day these figures are for (YYYY-MM-DD)." },
+        "due_count": { "type": "integer", "description": "Periods due on or before as_of." },
+        "settled_count": { "type": "integer", "description": "Sum of recurring_periods of the visible expenses that point at the plan." },
+        "pending_count": { "type": "integer", "description": "due_count minus settled_count, never below 0: periods not recorded yet." },
+        "pending_amount": { "type": "number" },
+        "pending_since": { "type": "string", "description": "Due date of the oldest pending period." },
+        "settled_expected_amount": { "type": "number", "description": "What the settled periods were expected to cost ..." },
+        "paid_amount": { "type": "number", "description": "... next to what the linked expenses actually paid." },
+        "current_amount": { "type": "number", "description": "Per-period price in force as of as_of." },
+        "next_due_date": { "type": "string" },
+        "next_amount": { "type": "number" },
+        "committed_periods": { "type": "integer", "description": "Periods inside the lock-in." },
+        "committed_remaining_periods": { "type": "integer", "description": "Locked-in periods not yet due." },
+        "committed_remaining_amount": { "type": "number" },
+        "exit_cost_today": { "type": "number", "description": "What leaving on as_of would cost under exit_fee." },
+        "next_price_change": {
+          "type": "object",
+          "properties": {
+            "date": { "type": "string" },
+            "from": { "type": "number" },
+            "to": { "type": "number" },
+            "reason": { "type": "string" }
+          }
+        }
+      }
+    },
+    "attention_item": {
+      "type": "object",
+      "properties": {
+        "kind": { "type": "string", "enum": ["pending", "price_change", "renewal", "commitment_ends", "ends"] },
+        "date": { "type": "string" },
+        "amount": { "type": "number" },
+        "from": { "type": "number" },
+        "to": { "type": "number" },
+        "periods": { "type": "integer" },
+        "reason": { "type": "string" }
+      }
+    },
+    "payment": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Expense UUID." },
+        "title": { "type": "string" },
+        "amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "recurring_periods": { "type": "integer" }
+      }
+    },
+    "example": {
+      "description": "Example recurring expense YAML (an 18-month phone contract with a price step and an exit fee; numbers made up):\n\napiVersion: ud/v1\nkind: RecurringExpense\nspec:\n  name: Acme Mobile phone contract\n  vendor: Acme Mobile\n  currency: SGD\n  starts_at: \"2027-01-08\"\n  first_due: \"2027-02-08\"\n  frequency: {unit: month, interval: 1}\n  committed_until: \"2028-07-07\"\n  exit_fee: {base: 540.00, mode: prorata_remaining}\n  terms:\n    - {amount: 29.90, effective_from: \"2027-01-08\"}\n    - {amount: 44.90, effective_from: \"2027-02-08\", reason: launch discount ends}\n    - {amount: 49.90, effective_from: \"2028-07-08\", reason: loyalty discount ends}"
+    }
+  }
+}
